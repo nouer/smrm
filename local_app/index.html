@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプルカルテ管理 - SMRM</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <link rel="stylesheet" href="style.css">
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#92400e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="カルテ管理">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+</head>
+<body>
+    <!-- 左上固定: ページ先頭へ戻るボタン -->
+    <button id="scroll-to-top-btn" type="button" class="scroll-to-top-btn no-print" aria-label="一番上に移動" title="一番上に移動">
+        <svg class="scroll-to-top-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 19V7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M6 12L12 6L18 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </button>
+
+    <!-- 右上固定: バージョン情報 -->
+    <div id="app-info-display" class="app-info-display no-print"></div>
+
+    <!-- ヘッダー -->
+    <header class="app-header">
+        <h1>シンプルカルテ管理</h1>
+    </header>
+
+    <!-- 更新バナー（ヘッダー直下） -->
+    <div id="update-banner" class="update-banner" style="display:none;">
+        <span>新しいバージョンが利用可能です</span>
+        <button id="update-banner-btn" class="btn btn-sm" type="button">今すぐ更新</button>
+        <button id="update-banner-close" class="update-banner-close" type="button" aria-label="閉じる">&times;</button>
+    </div>
+
+    <!-- タブナビゲーション -->
+    <nav class="tab-nav" id="tab-nav">
+        <button data-tab="customers" class="active">顧客</button>
+        <button data-tab="treatment">施術記録</button>
+        <button data-tab="history">履歴</button>
+        <button data-tab="settings">設定</button>
+    </nav>
+
+    <!-- 顧客タブ -->
+    <div id="tab-customers" class="tab-content active">
+        <div class="card">
+            <div class="search-bar">
+                <input type="text" id="customer-search" placeholder="顧客検索（氏名・ふりがな・ID）" autocomplete="off">
+            </div>
+            <div id="customer-list" class="customer-list">
+                <!-- 顧客カードが動的に挿入される -->
+            </div>
+            <button class="btn btn-primary btn-block" id="add-customer-btn">＋ 新規顧客登録</button>
+        </div>
+        <div id="customer-form-message" class="message"></div>
+    </div>
+
+    <!-- 施術記録タブ -->
+    <div id="tab-treatment" class="tab-content">
+        <!-- 顧客未選択時 -->
+        <div id="no-customer-selected" class="card">
+            <p class="text-center text-muted">顧客タブから顧客を選択してください</p>
+        </div>
+        <!-- 顧客選択時 -->
+        <div id="treatment-content" style="display:none;">
+            <!-- 顧客情報バー -->
+            <div id="selected-customer-bar" class="customer-info-bar"></div>
+            <!-- アレルギー警告 -->
+            <div id="allergy-warning" class="allergy-warning" style="display:none;"></div>
+            <!-- 施術記録入力フォーム -->
+            <div class="card">
+                <h3>施術記録</h3>
+                <div class="form-group">
+                    <label>来店日時</label>
+                    <input type="datetime-local" id="input-visited-at" autocomplete="off">
+                </div>
+                <div class="treatment-form">
+                    <div class="treatment-field">
+                        <label class="treatment-label treatment-chief">主訴</label>
+                        <textarea id="input-chief-complaint" rows="3" placeholder="お客様の訴え・気になる症状" autocomplete="off"></textarea>
+                    </div>
+                    <div class="treatment-field">
+                        <label class="treatment-label treatment-findings">所見</label>
+                        <textarea id="input-body-findings" rows="3" placeholder="施術者による身体の状態・所見" autocomplete="off"></textarea>
+                    </div>
+                    <div class="treatment-field">
+                        <label class="treatment-label treatment-content">施術内容</label>
+                        <textarea id="input-treatment-content" rows="2" placeholder="実施した施術内容" autocomplete="off"></textarea>
+                    </div>
+                    <div class="treatment-field">
+                        <label class="treatment-label treatment-after">施術後メモ・次回予定</label>
+                        <textarea id="input-after-notes" rows="2" placeholder="施術後の状態・次回の方針" autocomplete="off"></textarea>
+                    </div>
+                </div>
+                <!-- 前回施術後メモ参照 -->
+                <div id="prev-after-notes-hint" class="prev-plan-hint" style="display:none;"></div>
+            </div>
+            <!-- 施術メニュー・時間 -->
+            <div class="card">
+                <h3>施術メニュー</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>施術メニュー</label>
+                        <select id="input-treatment-menu">
+                            <option value="">選択してください</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>施術時間（分）</label>
+                        <input type="number" id="input-duration" min="1" max="480" placeholder="60" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <!-- 体調レベル入力 -->
+            <div class="card">
+                <h3>体調レベル</h3>
+                <div class="body-condition-grid">
+                    <div class="form-group">
+                        <label>痛みレベル (0-10)</label>
+                        <div class="level-input-wrapper">
+                            <input type="range" id="input-pain-level" min="0" max="10" value="0" class="level-slider">
+                            <span id="pain-level-display" class="level-display">0</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>凝りレベル (0-10)</label>
+                        <div class="level-input-wrapper">
+                            <input type="range" id="input-stiffness-level" min="0" max="10" value="0" class="level-slider">
+                            <span id="stiffness-level-display" class="level-display">0</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>疲労レベル (0-10)</label>
+                        <div class="level-input-wrapper">
+                            <input type="range" id="input-fatigue-level" min="0" max="10" value="0" class="level-slider">
+                            <span id="fatigue-level-display" class="level-display">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>気になる部位</label>
+                    <div class="body-areas-grid" id="body-areas-grid">
+                        <label><input type="checkbox" value="首"> 首</label>
+                        <label><input type="checkbox" value="右肩"> 右肩</label>
+                        <label><input type="checkbox" value="左肩"> 左肩</label>
+                        <label><input type="checkbox" value="背中上部"> 背中上部</label>
+                        <label><input type="checkbox" value="背中下部"> 背中下部</label>
+                        <label><input type="checkbox" value="腰"> 腰</label>
+                        <label><input type="checkbox" value="右腕"> 右腕</label>
+                        <label><input type="checkbox" value="左腕"> 左腕</label>
+                        <label><input type="checkbox" value="右脚"> 右脚</label>
+                        <label><input type="checkbox" value="左脚"> 左脚</label>
+                        <label><input type="checkbox" value="頭"> 頭</label>
+                        <label><input type="checkbox" value="目"> 目</label>
+                        <label><input type="checkbox" value="お腹"> お腹</label>
+                        <label><input type="checkbox" value="股関節"> 股関節</label>
+                        <label><input type="checkbox" value="膝"> 膝</label>
+                        <label><input type="checkbox" value="足首・足裏"> 足首・足裏</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>体調メモ</label>
+                    <textarea id="input-condition-notes" rows="2" placeholder="その他体調に関するメモ" autocomplete="off"></textarea>
+                </div>
+            </div>
+            <!-- 写真添付 -->
+            <div class="card" data-field-key="treatment.photo">
+                <h3>写真添付</h3>
+                <div class="media-attach-area" id="record-media-area" data-message-id="record-message">
+                    <div class="media-drop-zone">
+                        <p>ここに画像をドラッグ&ドロップ、または</p>
+                        <label class="btn btn-sm btn-secondary media-select-btn">
+                            ファイルを選択
+                            <input type="file" accept="image/*" multiple class="media-file-input" style="display:none;">
+                        </label>
+                        <p class="media-hint">最大5枚・JPEG自動変換</p>
+                    </div>
+                    <div class="media-thumb-grid"></div>
+                </div>
+            </div>
+            <!-- 保存ボタン -->
+            <button class="btn btn-primary btn-block" id="save-record-btn">施術記録を保存</button>
+            <div id="record-message" class="message"></div>
+            <!-- 直近記録サマリー -->
+            <div class="card" id="recent-records-section">
+                <h3>直近の記録</h3>
+                <div id="recent-records-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 履歴タブ -->
+    <div id="tab-history" class="tab-content">
+        <div id="no-customer-history" class="card">
+            <p class="text-center text-muted">顧客タブから顧客を選択してください</p>
+        </div>
+        <div id="history-content" style="display:none;">
+            <div id="history-customer-bar" class="customer-info-bar"></div>
+            <div class="card">
+                <div class="history-controls">
+                    <h3>来店履歴</h3>
+                    <button class="btn btn-sm" id="sort-toggle-btn">並び替え</button>
+                </div>
+                <div id="timeline-container" class="timeline-container"></div>
+                <div id="timeline-pagination" class="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定タブ -->
+    <div id="tab-settings" class="tab-content">
+        <!-- データ管理 -->
+        <div class="card">
+            <h3>データ管理</h3>
+            <div class="settings-buttons">
+                <button class="btn btn-primary" id="export-btn">エクスポート</button>
+                <label class="btn btn-secondary">
+                    インポート
+                    <input type="file" id="import-file" accept=".json" style="display:none;">
+                </label>
+            </div>
+            <div id="data-message" class="message"></div>
+            <hr>
+            <button class="btn btn-danger btn-sm" id="delete-all-btn">全データ削除</button>
+        </div>
+        <!-- 施術メニュー管理 -->
+        <div class="card">
+            <h3>施術メニュー管理</h3>
+            <div id="menu-settings-list"></div>
+            <button type="button" class="btn btn-sm btn-secondary" id="add-menu-btn">＋ メニューを追加</button>
+        </div>
+        <!-- 表示設定 -->
+        <div class="card">
+            <h3>表示設定</h3>
+            <div class="display-settings-section">
+                <h4>顧客情報フィールド</h4>
+                <div class="display-settings-grid">
+                    <label><input type="checkbox" data-display-key="fields.customer.code" checked> 顧客コード</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.kana" checked> ふりがな</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.phone" checked> 電話番号</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.email" checked> メールアドレス</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.address" checked> 住所</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.occupation" checked> 職業</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.firstVisit" checked> 初回来店日</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.practitioner" checked> 担当施術者</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.memo" checked> 備考</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.allergies" checked> アレルギー情報</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.histories" checked> 既往歴</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.photo" checked> 写真添付</label>
+                </div>
+                <h4>施術記録フィールド</h4>
+                <div class="display-settings-grid">
+                    <label><input type="checkbox" data-display-key="fields.treatment.menu" checked> 施術メニュー</label>
+                    <label><input type="checkbox" data-display-key="fields.treatment.duration" checked> 施術時間</label>
+                    <label><input type="checkbox" data-display-key="fields.treatment.bodyCondition" checked> 体調レベル</label>
+                    <label><input type="checkbox" data-display-key="fields.treatment.photo" checked> 写真添付</label>
+                </div>
+            </div>
+        </div>
+        <!-- 画像圧縮設定 -->
+        <div class="card">
+            <h3>画像圧縮設定</h3>
+            <p class="image-settings-description">写真添付時の画像サイズと画質を設定します。変更は新しく添付する写真にのみ適用されます。</p>
+            <div class="form-group">
+                <label for="image-preset-select">画質プリセット</label>
+                <select id="image-preset-select">
+                    <option value="high">高画質（長辺2048px・高品質）</option>
+                    <option value="standard" selected>標準（長辺1200px・推奨）</option>
+                    <option value="compact">容量節約（長辺800px・軽量）</option>
+                </select>
+            </div>
+            <div class="image-preset-hint" id="image-preset-hint">
+                <span data-preset="high">写真を高画質で保存します。肌の状態など詳細な記録に適しています。1枚あたり約300〜800KB</span>
+                <span data-preset="standard">通常の記録に十分な画質です。1枚あたり約100〜400KB</span>
+                <span data-preset="compact">ストレージ容量を節約します。1枚あたり約50〜200KB</span>
+            </div>
+        </div>
+        <!-- アプリ情報 -->
+        <div class="card">
+            <h3>アプリ情報</h3>
+            <div id="app-version-info"></div>
+            <button class="btn btn-sm" id="check-update-btn">更新を確認</button>
+            <div id="update-check-status"></div>
+        </div>
+        <!-- サンプルデータ -->
+        <div class="card">
+            <h3>サンプルデータ</h3>
+            <p class="sample-data-description">
+                動作確認やデモ用のサンプルデータ（顧客100名、施術記録10,000件）をインポートします。
+                既存データとマージされ、重複するIDは自動的にスキップされます。
+            </p>
+            <p class="sample-data-offline-note" id="sample-data-offline-note" style="display:none;">
+                この機能はオンライン環境でのみ利用できます。
+            </p>
+            <button class="btn btn-primary" id="import-sample-btn">サンプルインポート</button>
+            <div id="sample-data-message" class="message"></div>
+        </div>
+    </div>
+
+    <!-- 確認ダイアログ -->
+    <div id="confirm-overlay" class="overlay">
+        <div class="overlay-content">
+            <h3 id="confirm-title">確認</h3>
+            <p id="confirm-message">この操作を実行しますか？</p>
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="confirm-cancel">キャンセル</button>
+                <button class="btn btn-danger" id="confirm-ok">実行</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 顧客登録/編集モーダル -->
+    <div id="customer-form-overlay" class="overlay">
+        <div class="overlay-content overlay-content-wide">
+            <h3 id="customer-form-title">新規顧客登録</h3>
+            <form id="customer-form" autocomplete="off">
+                <input type="hidden" id="edit-customer-id">
+                <div class="form-row">
+                    <div class="form-group" data-field-key="customer.code">
+                        <label>顧客コード</label>
+                        <input type="text" id="input-customer-code" placeholder="自動採番" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>氏名 *</label>
+                        <input type="text" id="input-customer-name" placeholder="山田 花子" required autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" data-field-key="customer.kana">
+                        <label>ふりがな</label>
+                        <input type="text" id="input-customer-kana" placeholder="やまだ はなこ" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>生年月日</label>
+                        <input type="date" id="input-customer-birth" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>性別</label>
+                        <select id="input-customer-gender">
+                            <option value="">選択してください</option>
+                            <option value="male">男性</option>
+                            <option value="female">女性</option>
+                            <option value="other">その他</option>
+                        </select>
+                    </div>
+                    <div class="form-group" data-field-key="customer.phone">
+                        <label>電話番号</label>
+                        <input type="tel" id="input-customer-phone" placeholder="090-1234-5678" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" data-field-key="customer.email">
+                        <label>メールアドレス</label>
+                        <input type="email" id="input-customer-email" placeholder="example@mail.com" autocomplete="off">
+                    </div>
+                    <div class="form-group" data-field-key="customer.occupation">
+                        <label>職業</label>
+                        <input type="text" id="input-customer-occupation" placeholder="会社員" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-group" data-field-key="customer.address">
+                    <label>住所</label>
+                    <input type="text" id="input-customer-address" placeholder="東京都渋谷区..." autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>紹介元</label>
+                        <input type="text" id="input-customer-referral" placeholder="例: ホットペッパー、紹介" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>来店動機</label>
+                        <input type="text" id="input-customer-motivation" placeholder="例: 肩こりがひどい" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" data-field-key="customer.firstVisit">
+                        <label>初回来店日</label>
+                        <input type="date" id="input-customer-first-visit" autocomplete="off">
+                    </div>
+                    <div class="form-group" data-field-key="customer.practitioner">
+                        <label>担当施術者</label>
+                        <input type="text" id="input-customer-practitioner" placeholder="田中" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-group" data-field-key="customer.memo">
+                    <label>備考</label>
+                    <textarea id="input-customer-memo" rows="2" placeholder="備考" autocomplete="off"></textarea>
+                </div>
+                <!-- アレルギー一覧 -->
+                <div class="form-section" data-field-key="customer.allergies">
+                    <h4>アレルギー情報</h4>
+                    <div id="allergy-list-form"></div>
+                    <button type="button" class="btn btn-sm btn-secondary" id="add-allergy-btn">＋ アレルギーを追加</button>
+                </div>
+                <!-- 既往歴一覧 -->
+                <div class="form-section" data-field-key="customer.histories">
+                    <h4>既往歴</h4>
+                    <div id="history-list-form"></div>
+                    <button type="button" class="btn btn-sm btn-secondary" id="add-history-btn">＋ 既往歴を追加</button>
+                </div>
+                <!-- 写真添付 -->
+                <div class="form-section" data-field-key="customer.photo">
+                    <h4>写真添付</h4>
+                    <div class="media-attach-area" id="customer-media-area" data-message-id="customer-form-message">
+                        <div class="media-drop-zone">
+                            <p>画像を添付（ドラッグ&ドロップ可）</p>
+                            <label class="btn btn-sm btn-secondary media-select-btn">
+                                ファイルを選択
+                                <input type="file" accept="image/*" multiple class="media-file-input" style="display:none;">
+                            </label>
+                            <p class="media-hint">最大5枚</p>
+                        </div>
+                        <div class="media-thumb-grid"></div>
+                    </div>
+                </div>
+                <div class="btn-group" style="justify-content: flex-end; margin-top: 16px;">
+                    <button type="button" class="btn btn-secondary" id="customer-form-cancel">キャンセル</button>
+                    <button type="submit" class="btn btn-primary" id="customer-form-save">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 施術記録編集モーダル -->
+    <div id="edit-record-overlay" class="overlay">
+        <div class="overlay-content overlay-content-wide">
+            <h3>施術記録を編集</h3>
+            <form id="edit-record-form" autocomplete="off">
+                <input type="hidden" id="edit-record-id">
+                <div class="form-group">
+                    <label>来店日時</label>
+                    <input type="datetime-local" id="edit-visited-at" autocomplete="off">
+                </div>
+                <div class="treatment-form">
+                    <div class="treatment-field">
+                        <label class="treatment-label treatment-chief">主訴</label>
+                        <textarea id="edit-chief-complaint" rows="3" autocomplete="off"></textarea>
+                    </div>
+                    <div class="treatment-field">
+                        <label class="treatment-label treatment-findings">所見</label>
+                        <textarea id="edit-body-findings" rows="3" autocomplete="off"></textarea>
+                    </div>
+                    <div class="treatment-field">
+                        <label class="treatment-label treatment-content">施術内容</label>
+                        <textarea id="edit-treatment-content" rows="2" autocomplete="off"></textarea>
+                    </div>
+                    <div class="treatment-field">
+                        <label class="treatment-label treatment-after">施術後メモ・次回予定</label>
+                        <textarea id="edit-after-notes" rows="2" autocomplete="off"></textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>施術メニュー</label>
+                        <select id="edit-treatment-menu">
+                            <option value="">選択してください</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>施術時間（分）</label>
+                        <input type="number" id="edit-duration" min="1" max="480" autocomplete="off">
+                    </div>
+                </div>
+                <h4>体調レベル</h4>
+                <div class="body-condition-grid">
+                    <div class="form-group">
+                        <label>痛み (0-10)</label>
+                        <input type="number" id="edit-pain-level" min="0" max="10" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>凝り (0-10)</label>
+                        <input type="number" id="edit-stiffness-level" min="0" max="10" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>疲労 (0-10)</label>
+                        <input type="number" id="edit-fatigue-level" min="0" max="10" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-section">
+                    <h4>写真添付</h4>
+                    <div class="media-attach-area" id="edit-record-media-area" data-message-id="record-message">
+                        <div class="media-drop-zone">
+                            <p>画像を添付（ドラッグ&ドロップ可）</p>
+                            <label class="btn btn-sm btn-secondary media-select-btn">
+                                ファイルを選択
+                                <input type="file" accept="image/*" multiple class="media-file-input" style="display:none;">
+                            </label>
+                            <p class="media-hint">最大5枚</p>
+                        </div>
+                        <div class="media-thumb-grid"></div>
+                    </div>
+                </div>
+                <div class="btn-group" style="justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" id="edit-record-cancel">キャンセル</button>
+                    <button type="submit" class="btn btn-primary" id="edit-record-save">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 写真ライトボックス -->
+    <div id="media-lightbox-overlay" class="overlay" onclick="closeLightbox()">
+        <div class="media-lightbox-content" onclick="event.stopPropagation()">
+            <button class="media-lightbox-close" onclick="closeLightbox()">&times;</button>
+            <img id="media-lightbox-img" src="" alt="拡大画像">
+        </div>
+    </div>
+
+    <script src="version.js"></script>
+    <script src="smrm.calc.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

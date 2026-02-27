@@ -1,0 +1,47 @@
+services:
+  smrm-app:
+    # テスト/E2E 用: ホストへポート公開しない（ポート競合を根絶する）
+    build: .
+    image: "${COMPOSE_PROJECT_NAME:-smrm}_app_image"
+    networks:
+      smrm_net:
+        ipv4_address: "${SMRM_APP_IP:-172.32.0.10}"
+    volumes:
+      - ./local_app:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  smrm-app-public:
+    # ブラウザアクセス用: ホストへポート公開する（必要なら SMRM_PORT で変更）
+    image: "${COMPOSE_PROJECT_NAME:-smrm}_app_image"
+    build: .
+    ports:
+      - "${SMRM_PORT:-8086}:80"
+    networks:
+      - smrm_net
+    volumes:
+      - ./local_app:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  smrm-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - SMRM_PORT=${SMRM_PORT:-8086}
+      - E2E_APP_IP=${SMRM_APP_IP:-172.32.0.10}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - smrm_net
+    volumes:
+      - ./local_app:/app/local_app
+      - ./tools:/app/tools
+    depends_on:
+      - smrm-app
+
+networks:
+  smrm_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "${SMRM_SUBNET:-172.32.0.0/24}"
