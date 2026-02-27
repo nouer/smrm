@@ -1132,6 +1132,7 @@ body {
     .customer-card .customer-name {
         word-break: keep-all;
         overflow-wrap: break-word;
+        word-spacing: 100vw;
         line-height: 1.4;
     }
 
