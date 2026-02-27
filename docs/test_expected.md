@@ -236,6 +236,21 @@
 | E2E-032 | `#allergy-warning` | 存在する（not null） |
 | E2E-033 | `#prev-after-notes-hint` | 存在する（not null） |
 
+### 2.10 顧客詳細表示
+
+| テストID | 検証項目 | 期待値 |
+|---------|---------|--------|
+| E2E-040 | `#customer-detail-overlay` の classList | `.show` を含む |
+| E2E-041 | `#customer-detail-body` テキスト | 登録した顧客名を含む |
+| E2E-041 | `#customer-detail-body` テキスト | 顧客コード（例: `C0001`）を含む |
+| E2E-042 | 閉じるボタンクリック後の `#customer-detail-overlay` classList | `.show` を含まない |
+| E2E-043 | 編集ボタンクリック後の `#customer-detail-overlay` classList | `.show` を含まない |
+| E2E-043 | 編集ボタンクリック後の顧客編集モーダル | 表示（visible） |
+| E2E-044 | 施術記録タブ顧客情報バークリック後の `#customer-detail-overlay` classList | `.show` を含む |
+| E2E-045 | 履歴タブ顧客情報バークリック後の `#customer-detail-overlay` classList | `.show` を含む |
+| E2E-046 | `.customer-card-initial` 要素 | 存在する（not null） |
+| E2E-046 | `.customer-card-initial` テキスト | 顧客名の先頭1文字 |
+
 ---
 
 ## 3. テスト実行結果

@@ -297,3 +297,87 @@
 - 設定タブの「更新を確認」ボタン
 - `registration.update()` を呼び出し
 - 結果を `#update-check-status` に表示
+
+---
+
+## 9. 顧客詳細表示（読み取り専用オーバーレイ）
+
+### 9.1 オーバーレイ構成
+
+| 項目 | 値 |
+|------|-----|
+| 要素ID | `customer-detail-overlay` |
+| CSSクラス | `overlay` |
+| コンテンツ部 | `.overlay-content.overlay-content-wide` (max-width: 700px) |
+| タイトル | 「顧客詳細」(`<h3>`) |
+| 本文コンテナ | `#customer-detail-body` |
+
+### 9.2 アクセスポイント
+
+| # | トリガー | 要素 | 呼び出し |
+|---|---------|------|---------|
+| 1 | 顧客カードの「詳細」ボタン | `.btn.btn-sm.btn-secondary` | `openCustomerDetail(customerId)` |
+| 2 | 施術記録タブの顧客情報バークリック | `#selected-customer-bar` | `openCustomerDetail(selectedCustomerId)` |
+| 3 | 履歴タブの顧客情報バークリック | `#history-customer-bar` | `openCustomerDetail(selectedCustomerId)` |
+
+※ 顧客情報バーのクリックハンドラでは、`<img>` 要素のクリックは除外される。
+
+### 9.3 表示セクション
+
+`openCustomerDetail(customerId)` がIndexedDBから顧客データを取得し、以下の8セクションのHTMLを構築して `#customer-detail-body` に挿入する。
+
+| # | セクション | CSSクラス | 表示項目 |
+|---|-----------|----------|---------|
+| 1 | 基本情報 | `detail-section` | 顧客コード、氏名、ふりがな、生年月日（年齢自動計算）、性別 |
+| 2 | 連絡先 | `detail-section` | 電話番号、メール、住所 |
+| 3 | 来店情報 | `detail-section` | 職業、紹介元、来店動機、初回来店日、担当施術者 |
+| 4 | 備考 | `detail-section` | 備考テキスト（未入力時は「---」） |
+| 5 | アレルギー情報 | `detail-section` | アレルゲン名・重症度バッジ・備考の一覧（未登録時は「登録なし」） |
+| 6 | 既往歴 | `detail-section` | 疾患名・備考の一覧（未登録時は「登録なし」） |
+| 7 | 写真 | `detail-section` | 登録済みメディアのサムネイル一覧（クリックでライトボックス表示） |
+| 8 | メタ情報 | `detail-meta-section` | 登録日、更新日 |
+
+各セクションの表示/非表示は `applyDisplaySettings()` により表示設定に従って制御される。
+
+### 9.4 ヘルパー関数
+
+#### `detailRow(label, value, fieldKey)`
+
+| 項目 | 値 |
+|------|-----|
+| 役割 | 読み取り専用の行（ラベル＋値）HTMLを生成 |
+| 引数 `label` | 表示ラベル文字列 |
+| 引数 `value` | 表示値（空の場合は「---」をミュート表示） |
+| 引数 `fieldKey` | 任意。`data-field-key` 属性に設定し、表示設定によるフィルタリングに使用 |
+| 出力 | `<div class="detail-row">` を含むHTML文字列 |
+| セキュリティ | `escapeHtml()` でラベル・値をエスケープ |
+
+### 9.5 操作ボタン
+
+| ボタン | 要素ID | CSSクラス | 動作 |
+|-------|--------|----------|------|
+| 閉じる | `customer-detail-close` | `btn btn-secondary` | オーバーレイの `.show` クラスを除去して閉じる |
+| 編集 | `customer-detail-edit` | `btn btn-primary` | オーバーレイを閉じ、顧客編集モーダル（`openEditCustomerForm`）を開く |
+
+### 9.6 レスポンシブ対応
+
+| ブレークポイント | 対象 | 変更内容 |
+|----------------|------|---------|
+| ≤768px | `.overlay-content-wide` | `max-width: 100%` |
+| ≤480px | `.overlay-content` | `padding: 16px`、`max-height: 95vh` |
+| ≤480px | `.detail-row` | グリッド列: `100px 1fr`（通常時 `120px 1fr`）、gap: `4px` |
+| ≤480px | `.detail-meta-section` | `flex-direction: column`、gap: `4px` |
+| ≤480px | `.overlay` | `padding: 10px` |
+
+### 9.7 顧客カードのイニシャル表示
+
+写真が未登録の顧客カードでは、写真サムネイルの代わりに顧客名の先頭1文字（イニシャル）を表示する。
+
+| 項目 | 値 |
+|------|-----|
+| 対象 | 顧客カード（`renderCustomerList` 内） |
+| 条件 | 顧客に紐づくメディアが存在しない場合 |
+| 表示 | 氏名の先頭1文字（氏名が空の場合は「?」） |
+| 要素 | `<span class="customer-card-thumb customer-card-initial">` |
+| サイズ | 32×32px、円形（`border-radius: 50%`） |
+| スタイル | 背景: `var(--primary-light)`（#fef3c7）、文字色: `var(--primary)`（#92400e）、太字 |
