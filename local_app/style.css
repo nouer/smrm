@@ -464,6 +464,16 @@ body {
     border: 1px solid var(--gray-200);
 }
 
+.customer-card-initial {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.9em;
+}
+
 /* === 顧客情報バー === */
 .customer-info-bar {
     background: var(--primary-light);
@@ -477,6 +487,10 @@ body {
     font-size: 0.9em;
     color: var(--primary-dark);
     font-weight: 500;
+    cursor: pointer;
+}
+.customer-info-bar:hover {
+    background: #fde68a;
 }
 
 .customer-info-bar .customer-bar-code {
@@ -1025,6 +1039,80 @@ body {
     justify-content: flex-end;
 }
 
+/* === 顧客詳細表示（読み取り専用） === */
+.detail-section {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-200);
+}
+.detail-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+.detail-section h4 {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+.detail-dl {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+.detail-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row dt {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--gray-500);
+}
+.detail-row dd {
+    font-size: 0.95em;
+    color: var(--gray-800);
+    word-break: break-word;
+}
+.detail-memo {
+    font-size: 0.9em;
+    color: var(--gray-700);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    background: var(--gray-50);
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin: 0;
+}
+.detail-tag-list {
+    list-style: none;
+    padding: 0;
+}
+.detail-tag-list li {
+    padding: 6px 0;
+    font-size: 0.9em;
+    border-bottom: 1px solid var(--gray-100);
+}
+.detail-tag-list li:last-child { border-bottom: none; }
+.detail-note {
+    color: var(--gray-500);
+    font-size: 0.9em;
+}
+.detail-meta-section {
+    display: flex;
+    gap: 16px;
+    padding-top: 8px;
+    border-bottom: none;
+}
+.detail-meta-text {
+    font-size: 0.8em;
+    color: var(--gray-400);
+}
+
 /* === 設定ボタングループ === */
 .settings-buttons {
     display: flex;
@@ -1127,13 +1215,12 @@ body {
 
     .customer-card .customer-card-body {
         min-width: 80px;
+        flex-wrap: wrap;
     }
 
     .customer-card .customer-name {
-        word-break: keep-all;
-        overflow-wrap: break-word;
-        word-spacing: 100vw;
-        line-height: 1.4;
+        white-space: nowrap;
+        flex-basis: 100%;
     }
 
     .customer-info-bar {
@@ -1152,6 +1239,16 @@ body {
     .overlay-content {
         padding: 16px;
         max-height: 95vh;
+    }
+
+    .detail-row {
+        grid-template-columns: 100px 1fr;
+        gap: 4px;
+    }
+
+    .detail-meta-section {
+        flex-direction: column;
+        gap: 4px;
     }
 }
 

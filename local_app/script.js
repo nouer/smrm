@@ -638,9 +638,10 @@ function renderCustomerCard(customer, media) {
     if (age != null) metaParts.push(`${age}歳`);
     if (gender) metaParts.push(gender);
     const metaText = metaParts.join(' / ');
+    const initial = customer.name ? customer.name.charAt(0) : '?';
     const thumbHtml = media
         ? `<img src="${media.thumbnail}" alt="" class="customer-card-thumb">`
-        : '';
+        : `<span class="customer-card-thumb customer-card-initial">${escapeHtml(initial)}</span>`;
 
     return `<div class="customer-card${isSelected}" data-customer-id="${customer.id}" onclick="selectCustomer('${customer.id}')">
         ${thumbHtml}
@@ -653,6 +654,7 @@ function renderCustomerCard(customer, media) {
             ${metaText ? `<span class="customer-meta">${metaText}</span>` : ''}
         </div>
         <div class="customer-card-actions">
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); openCustomerDetail('${customer.id}')">詳細</button>
             <button class="btn btn-sm" onclick="event.stopPropagation(); openCustomerForm('${customer.id}')">編集</button>
             <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteCustomer('${customer.id}')">削除</button>
         </div>
@@ -749,6 +751,141 @@ function showAllergyWarning() {
         .join('、');
     warningEl.innerHTML = `<strong>アレルギー:</strong> ${allergens}`;
     warningEl.style.display = '';
+}
+
+function detailRow(label, value, fieldKey) {
+    const attr = fieldKey ? ` data-field-key="${fieldKey}"` : '';
+    return `<div class="detail-row"${attr}>
+        <dt>${escapeHtml(label)}</dt>
+        <dd>${value ? escapeHtml(String(value)) : '<span class="text-muted">---</span>'}</dd>
+    </div>`;
+}
+
+async function openCustomerDetail(customerId) {
+    const customer = await getFromStore('customers', customerId);
+    if (!customer) return;
+
+    const overlay = document.getElementById('customer-detail-overlay');
+    overlay.dataset.customerId = customerId;
+    const body = document.getElementById('customer-detail-body');
+
+    const age = customer.birthDate ? calcAge(customer.birthDate) : null;
+    const gender = GENDER_MAP[customer.gender] || '';
+    const birthDisplay = customer.birthDate
+        ? formatDate(customer.birthDate) + (age != null ? ` (${age}歳)` : '')
+        : '';
+
+    let html = '';
+
+    // 基本情報
+    html += '<div class="detail-section">';
+    html += '<h4>基本情報</h4>';
+    html += '<dl class="detail-dl">';
+    html += detailRow('顧客コード', customer.customerCode, 'customer.code');
+    html += detailRow('氏名', customer.name);
+    html += detailRow('ふりがな', customer.nameKana, 'customer.kana');
+    html += detailRow('生年月日', birthDisplay);
+    html += detailRow('性別', gender);
+    html += '</dl></div>';
+
+    // 連絡先
+    html += '<div class="detail-section">';
+    html += '<h4>連絡先</h4>';
+    html += '<dl class="detail-dl">';
+    html += detailRow('電話番号', customer.phone, 'customer.phone');
+    html += detailRow('メール', customer.email, 'customer.email');
+    html += detailRow('住所', customer.address, 'customer.address');
+    html += '</dl></div>';
+
+    // 来店情報
+    html += '<div class="detail-section">';
+    html += '<h4>来店情報</h4>';
+    html += '<dl class="detail-dl">';
+    html += detailRow('職業', customer.occupation, 'customer.occupation');
+    html += detailRow('紹介元', customer.referralSource);
+    html += detailRow('来店動機', customer.visitMotivation);
+    html += detailRow('初回来店日', customer.firstVisitDate ? formatDate(customer.firstVisitDate) : '', 'customer.firstVisit');
+    html += detailRow('担当施術者', customer.practitioner, 'customer.practitioner');
+    html += '</dl></div>';
+
+    // 備考
+    if (customer.memo) {
+        html += `<div class="detail-section" data-field-key="customer.memo">`;
+        html += '<h4>備考</h4>';
+        html += `<p class="detail-memo">${escapeHtml(customer.memo)}</p>`;
+        html += '</div>';
+    } else {
+        html += `<div class="detail-section" data-field-key="customer.memo">`;
+        html += '<h4>備考</h4>';
+        html += '<p class="detail-note">---</p>';
+        html += '</div>';
+    }
+
+    // アレルギー
+    const severityMap = { mild: '軽度', moderate: '中等度', severe: '重度' };
+    const severityBadge = { mild: 'badge-success', moderate: 'badge-warning', severe: 'badge-danger' };
+    html += `<div class="detail-section" data-field-key="customer.allergies">`;
+    html += '<h4>アレルギー情報</h4>';
+    if (customer.allergies && customer.allergies.length > 0) {
+        html += '<ul class="detail-tag-list">';
+        customer.allergies.forEach(a => {
+            const allergen = typeof a === 'string' ? a : (a.allergen || '');
+            const severity = typeof a === 'object' ? a.severity : '';
+            const sevLabel = severityMap[severity] || '';
+            const sevClass = severityBadge[severity] || '';
+            const sevHtml = sevLabel ? ` <span class="badge ${sevClass}">${sevLabel}</span>` : '';
+            html += `<li>${escapeHtml(allergen)}${sevHtml}</li>`;
+        });
+        html += '</ul>';
+    } else {
+        html += '<p class="detail-note">登録なし</p>';
+    }
+    html += '</div>';
+
+    // 既往歴
+    html += `<div class="detail-section" data-field-key="customer.histories">`;
+    html += '<h4>既往歴</h4>';
+    if (customer.medicalHistory && customer.medicalHistory.length > 0) {
+        html += '<ul class="detail-tag-list">';
+        customer.medicalHistory.forEach(h => {
+            const text = typeof h === 'string' ? h : (h.condition || '');
+            html += `<li>${escapeHtml(text)}</li>`;
+        });
+        html += '</ul>';
+    } else {
+        html += '<p class="detail-note">登録なし</p>';
+    }
+    html += '</div>';
+
+    // 写真
+    const customerMedia = await getMediaByParent(customerId);
+    if (customerMedia.length > 0) {
+        html += `<div class="detail-section" data-field-key="customer.photo">`;
+        html += '<h4>写真</h4>';
+        html += '<div class="media-inline-thumbs">';
+        customerMedia.forEach(m => {
+            html += `<img src="${m.thumbnail}" alt="${escapeHtml(m.fileName)}" onclick="openMediaLightbox('${m.id}', 'saved')">`;
+        });
+        html += '</div></div>';
+    }
+
+    // メタ情報
+    html += '<div class="detail-section detail-meta-section">';
+    if (customer.createdAt) {
+        html += `<span class="detail-meta-text">登録日: ${formatDateTime(customer.createdAt)}</span>`;
+    }
+    if (customer.updatedAt) {
+        html += `<span class="detail-meta-text">更新日: ${formatDateTime(customer.updatedAt)}</span>`;
+    }
+    html += '</div>';
+
+    body.innerHTML = html;
+
+    // 表示設定を適用
+    const settings = await loadDisplaySettings();
+    applyDisplaySettings(settings);
+
+    overlay.classList.add('show');
 }
 
 async function openCustomerForm(customerId) {
@@ -2077,6 +2214,26 @@ async function initApp() {
     document.getElementById('edit-record-form').addEventListener('submit', saveEditRecord);
     document.getElementById('edit-record-cancel').addEventListener('click', () => {
         document.getElementById('edit-record-overlay').classList.remove('show');
+    });
+
+    // 顧客詳細オーバーレイ
+    document.getElementById('customer-detail-close').addEventListener('click', () => {
+        document.getElementById('customer-detail-overlay').classList.remove('show');
+    });
+    document.getElementById('customer-detail-edit').addEventListener('click', () => {
+        const cid = document.getElementById('customer-detail-overlay').dataset.customerId;
+        document.getElementById('customer-detail-overlay').classList.remove('show');
+        if (cid) openCustomerForm(cid);
+    });
+
+    // 顧客情報バー → 詳細表示
+    document.getElementById('selected-customer-bar').addEventListener('click', (e) => {
+        if (e.target.tagName === 'IMG') return;
+        if (selectedCustomerId) openCustomerDetail(selectedCustomerId);
+    });
+    document.getElementById('history-customer-bar').addEventListener('click', (e) => {
+        if (e.target.tagName === 'IMG') return;
+        if (selectedCustomerId) openCustomerDetail(selectedCustomerId);
     });
 
     // 設定
