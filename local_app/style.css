@@ -1125,6 +1125,16 @@ body {
         flex-wrap: wrap;
     }
 
+    .customer-card .customer-card-body {
+        min-width: 80px;
+    }
+
+    .customer-card .customer-name {
+        word-break: keep-all;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+    }
+
     .customer-info-bar {
         flex-wrap: wrap;
         font-size: 0.85em;
