@@ -77,7 +77,7 @@
             <div class="card">
                 <h3>施術記録</h3>
                 <div class="form-group">
-                    <label>来店日時</label>
+                    <label>施術日時</label>
                     <input type="datetime-local" id="input-visited-at" autocomplete="off">
                 </div>
                 <div class="treatment-form">
@@ -204,7 +204,7 @@
             <div id="history-customer-bar" class="customer-info-bar"></div>
             <div class="card">
                 <div class="history-controls">
-                    <h3>来店履歴</h3>
+                    <h3>施術履歴</h3>
                     <button class="btn btn-sm" id="sort-toggle-btn">並び替え</button>
                 </div>
                 <div id="timeline-container" class="timeline-container"></div>
@@ -247,7 +247,7 @@
                     <label><input type="checkbox" data-display-key="fields.customer.email" checked> メールアドレス</label>
                     <label><input type="checkbox" data-display-key="fields.customer.address" checked> 住所</label>
                     <label><input type="checkbox" data-display-key="fields.customer.occupation" checked> 職業</label>
-                    <label><input type="checkbox" data-display-key="fields.customer.firstVisit" checked> 初回来店日</label>
+                    <label><input type="checkbox" data-display-key="fields.customer.firstVisit" checked> 初回施術日</label>
                     <label><input type="checkbox" data-display-key="fields.customer.practitioner" checked> 担当施術者</label>
                     <label><input type="checkbox" data-display-key="fields.customer.memo" checked> 備考</label>
                     <label><input type="checkbox" data-display-key="fields.customer.allergies" checked> アレルギー情報</label>
@@ -376,13 +376,13 @@
                         <input type="text" id="input-customer-referral" placeholder="例: ホットペッパー、紹介" autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label>来店動機</label>
+                        <label>利用動機</label>
                         <input type="text" id="input-customer-motivation" placeholder="例: 肩こりがひどい" autocomplete="off">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group" data-field-key="customer.firstVisit">
-                        <label>初回来店日</label>
+                        <label>初回施術日</label>
                         <input type="date" id="input-customer-first-visit" autocomplete="off">
                     </div>
                     <div class="form-group" data-field-key="customer.practitioner">
@@ -436,7 +436,7 @@
             <form id="edit-record-form" autocomplete="off">
                 <input type="hidden" id="edit-record-id">
                 <div class="form-group">
-                    <label>来店日時</label>
+                    <label>施術日時</label>
                     <input type="datetime-local" id="edit-visited-at" autocomplete="off">
                 </div>
                 <div class="treatment-form">

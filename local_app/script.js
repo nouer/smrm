@@ -797,14 +797,14 @@ async function openCustomerDetail(customerId) {
     html += detailRow('住所', customer.address, 'customer.address');
     html += '</dl></div>';
 
-    // 来店情報
+    // 利用情報
     html += '<div class="detail-section">';
-    html += '<h4>来店情報</h4>';
+    html += '<h4>利用情報</h4>';
     html += '<dl class="detail-dl">';
     html += detailRow('職業', customer.occupation, 'customer.occupation');
     html += detailRow('紹介元', customer.referralSource);
-    html += detailRow('来店動機', customer.visitMotivation);
-    html += detailRow('初回来店日', customer.firstVisitDate ? formatDate(customer.firstVisitDate) : '', 'customer.firstVisit');
+    html += detailRow('利用動機', customer.visitMotivation);
+    html += detailRow('初回施術日', customer.firstVisitDate ? formatDate(customer.firstVisitDate) : '', 'customer.firstVisit');
     html += detailRow('担当施術者', customer.practitioner, 'customer.practitioner');
     html += '</dl></div>';
 
