@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ユーザーマニュアル — シンプルカルテ管理 (smrm) — SMRM</title>
+<meta name="description" content="1. [はじめに](#1-はじめに)">
+<meta property="og:title" content="ユーザーマニュアル — シンプルカルテ管理 (smrm) — SMRM">
+<meta property="og:description" content="1. [はじめに](#1-はじめに)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="シンプルカルテ管理">
+<link rel="icon" href="/icons/favicon-32.png" type="image/png">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Serif CJK JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background-color: #f8f8f8;
+}
+
+.container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 32px 64px;
+    background-color: #fff;
+    min-height: 100vh;
+}
+
+nav.back-link {
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+nav.back-link a {
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+nav.back-link a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    font-family: 'Noto Sans CJK JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1.2em;
+    padding-bottom: 0.4em;
+    border-bottom: 2px solid #333;
+}
+
+h2 {
+    font-family: 'Noto Sans CJK JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 2em;
+    margin-bottom: 0.6em;
+    padding-bottom: 0.2em;
+    border-bottom: 1px solid #ccc;
+}
+
+h3 {
+    font-family: 'Noto Sans CJK JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 1.5em;
+    margin-bottom: 0.4em;
+}
+
+h4 {
+    font-family: 'Noto Sans CJK JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.3em;
+}
+
+p {
+    margin: 0.6em 0;
+    text-align: justify;
+}
+
+ul, ol {
+    margin: 0.6em 0;
+    padding-left: 2em;
+}
+
+li {
+    margin: 0.3em 0;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    font-size: 15px;
+}
+
+th, td {
+    border: 1px solid #999;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 2em 0;
+}
+
+code {
+    font-family: 'UDEV Gothic NF', 'Cica', monospace;
+    font-size: 14px;
+    background-color: #f5f5f5;
+    padding: 0.15em 0.3em;
+    border-radius: 3px;
+}
+
+pre {
+    background-color: #f5f5f5;
+    padding: 1em;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.4;
+    border-radius: 4px;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+}
+
+blockquote {
+    border-left: 3px solid #ccc;
+    margin: 0.8em 0;
+    padding: 0.2em 0 0.2em 1em;
+    color: #555;
+}
+
+strong {
+    font-weight: bold;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.5em auto;
+}
+
+a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+sub {
+    font-size: 12px;
+    color: #888;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 16px 16px 48px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    h2 {
+        font-size: 19px;
+    }
+
+    h3 {
+        font-size: 16px;
+    }
+
+    table {
+        font-size: 13px;
+    }
+
+    th, td {
+        padding: 6px 8px;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<nav class="back-link"><a href="/">← アプリに戻る</a></nav>
+<h1>ユーザーマニュアル — シンプルカルテ管理 (smrm)</h1>
+<h2>目次</h2>
+<ol>
+<li><a href="#1-%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB">はじめに</a></li>
+<li><a href="#2-%E7%94%BB%E9%9D%A2%E6%A7%8B%E6%88%90">画面構成</a></li>
+<li><a href="#3-%E9%A1%A7%E5%AE%A2%E7%AE%A1%E7%90%86">顧客管理</a></li>
+<li><a href="#4-%E6%96%BD%E8%A1%93%E8%A8%98%E9%8C%B2">施術記録</a></li>
+<li><a href="#5-%E6%96%BD%E8%A1%93%E5%B1%A5%E6%AD%B4">施術履歴</a></li>
+<li><a href="#6-%E8%A8%AD%E5%AE%9A">設定</a></li>
+<li><a href="#7-%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E4%BF%9D%E5%AD%98%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">データの保存について</a></li>
+</ol>
+<hr />
+<h2>1. はじめに</h2>
+<h3>1.1 smrm とは</h3>
+<p>「シンプルカルテ管理（smrm）」は、個人サロン・治療院向けのブラウザ完結型カルテ管理アプリケーションです。
+マッサージ・整体・鍼灸・エステなどの施術院で、顧客情報と施術記録を手軽に管理できます。</p>
+<h3>1.2 特徴</h3>
+<ul>
+<li><strong>ブラウザだけで動作</strong> — アプリのインストールは不要です</li>
+<li><strong>サーバー不要</strong> — データはお使いの端末内に保存されます</li>
+<li><strong>オフライン対応</strong> — インターネット接続なしでも使用できます</li>
+<li><strong>無料</strong> — 月額費用はかかりません</li>
+</ul>
+<h3>1.3 動作環境</h3>
+<ul>
+<li>Google Chrome（推奨）</li>
+<li>Firefox</li>
+<li>Safari</li>
+<li>Microsoft Edge</li>
+</ul>
+<p>スマートフォン・タブレット・PCのいずれでも利用可能です。</p>
+<table>
+<thead>
+<tr>
+<th>PC表示</th>
+<th>モバイル表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/docs-images/03_customers_list.png" alt="PC表示" /></td>
+<td><img src="/docs-images/12_mobile_customers.png" alt="モバイル表示" /></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. 画面構成</h2>
+<p>アプリは4つのタブで構成されています。画面上部のタブボタンで切り替えます。</p>
+<table>
+<thead>
+<tr>
+<th>タブ</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>顧客</strong></td>
+<td>顧客の検索・一覧表示・新規登録</td>
+</tr>
+<tr>
+<td><strong>施術記録</strong></td>
+<td>選択した顧客の施術記録を入力</td>
+</tr>
+<tr>
+<td><strong>履歴</strong></td>
+<td>選択した顧客の施術履歴をタイムラインで表示</td>
+</tr>
+<tr>
+<td><strong>設定</strong></td>
+<td>データ管理・表示設定・アプリ情報</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/docs-images/01_customers_empty.png" alt="顧客タブ（初期画面）" /></p>
+<h3>共通UI要素</h3>
+<ul>
+<li><strong>左上のボタン（↑）</strong>: ページの一番上にスクロールします</li>
+<li><strong>右上の表示</strong>: アプリのバージョン情報を表示しています</li>
+<li><strong>ヘッダー（「シンプルカルテ管理」）</strong>: クリックするとページの一番上に戻ります</li>
+</ul>
+<hr />
+<h2>3. 顧客管理</h2>
+<h3>3.1 新規顧客登録</h3>
+<ol>
+<li>「顧客」タブを開きます</li>
+<li>画面下部の「＋ 新規顧客登録」ボタンをタップします</li>
+<li>登録フォームが表示されます</li>
+<li>必要な情報を入力します
+<ul>
+<li><strong>氏名</strong>（必須）</li>
+<li>ふりがな</li>
+<li>生年月日</li>
+<li>性別</li>
+<li>電話番号</li>
+<li>メールアドレス</li>
+<li>住所</li>
+<li>職業</li>
+<li>紹介元・利用動機</li>
+<li>初回施術日・担当施術者</li>
+<li>備考</li>
+<li>アレルギー情報</li>
+<li>既往歴</li>
+<li>写真</li>
+</ul>
+</li>
+<li>「保存」ボタンをタップして登録完了です</li>
+</ol>
+<p><img src="/docs-images/02_customer_form.png" alt="顧客登録フォーム" /></p>
+<p><strong>顧客コード</strong>は自動で採番されます（C0001, C0002, ...）。手動で入力することもできます。</p>
+<h3>3.2 顧客一覧・検索</h3>
+<p>顧客タブには登録済みの全顧客がカード形式で表示されます。
+各カードには顧客名・顧客コードに加え、写真が登録されている場合はサムネイル、未登録の場合は氏名の先頭1文字（イニシャル）が表示されます。
+カードには「詳細」「編集」「削除」ボタンがあり、「詳細」ボタンをタップすると顧客情報を読み取り専用で確認できます。</p>
+<p><img src="/docs-images/03_customers_list.png" alt="顧客一覧" /></p>
+<p><strong>検索方法</strong>:</p>
+<ul>
+<li>検索バーに氏名・ふりがな・顧客コードを入力すると、リアルタイムで絞り込まれます</li>
+<li>部分一致で検索できます（例: 「田中」で「田中太郎」「田中花子」がヒット）</li>
+</ul>
+<p><img src="/docs-images/04_customer_search.png" alt="顧客検索" /></p>
+<h3>3.3 顧客編集</h3>
+<ol>
+<li>顧客カード内の「編集」ボタンをタップします</li>
+<li>登録時と同じフォームが開きます</li>
+<li>情報を修正して「保存」をタップします</li>
+</ol>
+<h3>3.4 顧客削除</h3>
+<ol>
+<li>顧客カード内の「削除」ボタンをタップします</li>
+<li>確認ダイアログが表示されます</li>
+<li>「実行」をタップすると削除されます</li>
+</ol>
+<p><strong>注意</strong>: 削除すると、その顧客に紐づく施術記録と写真もすべて削除されます。</p>
+<h3>3.5 アレルギー情報の登録</h3>
+<ol>
+<li>顧客登録/編集フォームの「アレルギー情報」セクションを開きます</li>
+<li>「＋ アレルギーを追加」ボタンをタップします</li>
+<li>アレルゲン名・重症度・備考を入力します</li>
+<li>複数のアレルギーを追加できます</li>
+</ol>
+<p>アレルギーが登録されている顧客を選択すると、施術記録タブに<strong>警告バー</strong>が表示されます。</p>
+<p><img src="/docs-images/14_allergy_warning.png" alt="アレルギー警告" /></p>
+<h3>3.6 既往歴の登録</h3>
+<ol>
+<li>顧客登録/編集フォームの「既往歴」セクションを開きます</li>
+<li>「＋ 既往歴を追加」ボタンをタップします</li>
+<li>疾患名・備考を入力します</li>
+</ol>
+<h3>3.7 顧客詳細の表示</h3>
+<p>登録済みの顧客情報を、編集せずに確認したい場合に使います。</p>
+<p><strong>開き方</strong>（3つの方法）:</p>
+<ol>
+<li><strong>顧客カードの「詳細」ボタン</strong>: 顧客タブのカードにある「詳細」ボタンをタップ</li>
+<li><strong>施術記録タブの顧客情報バー</strong>: 施術記録タブ上部の顧客名が表示されているバーをタップ</li>
+<li><strong>履歴タブの顧客情報バー</strong>: 履歴タブ上部の顧客名が表示されているバーをタップ</li>
+</ol>
+<p><strong>表示される情報</strong>:</p>
+<ul>
+<li>基本情報（顧客コード、氏名、ふりがな、生年月日・年齢、性別）</li>
+<li>連絡先（電話番号、メール、住所）</li>
+<li>利用情報（職業、紹介元、利用動機、初回施術日、担当施術者）</li>
+<li>備考</li>
+<li>アレルギー情報</li>
+<li>既往歴</li>
+<li>登録済み写真</li>
+<li>登録日・更新日</li>
+</ul>
+<p><strong>操作ボタン</strong>:</p>
+<ul>
+<li><strong>閉じる</strong>: 詳細画面を閉じます</li>
+<li><strong>編集</strong>: 詳細画面を閉じて、編集フォームを開きます</li>
+</ul>
+<hr />
+<h2>4. 施術記録</h2>
+<h3>4.1 施術記録の入力手順</h3>
+<ol>
+<li>「顧客」タブで顧客カードをタップして選択します</li>
+<li>自動的に「施術記録」タブに切り替わります</li>
+</ol>
+<blockquote>
+<p><strong>ヒント</strong>: 施術記録タブや履歴タブの上部にある顧客情報バーをタップすると、顧客詳細をすぐに確認できます。施術中に顧客情報を参照したい場合に便利です。</p>
+</blockquote>
+<ol start="3">
+<li>以下の情報を入力します</li>
+</ol>
+<h4>基本情報</h4>
+<ul>
+<li><strong>施術日時</strong>: デフォルトで現在日時が設定されます。変更も可能です</li>
+</ul>
+<h4>施術内容（4つのテキストエリア）</h4>
+<ul>
+<li><strong>主訴</strong>: お客様の訴え・気になる症状</li>
+<li><strong>所見</strong>: 施術者による身体の状態・所見</li>
+<li><strong>施術内容</strong>: 実施した施術内容</li>
+<li><strong>施術後メモ・次回予定</strong>: 施術後の状態・次回の方針</li>
+</ul>
+<p>※ 4つのうち<strong>いずれか1つ以上</strong>を入力すれば保存できます。</p>
+<p><img src="/docs-images/06_treatment_input.png" alt="施術記録入力" /></p>
+<h4>前回施術後メモの参照</h4>
+<p>前回の施術記録に「施術後メモ」がある場合、フォーム下部にヒントとして表示されます。施術の継続性を確認する際に便利です。</p>
+<h4>施術メニュー・時間</h4>
+<ul>
+<li><strong>施術メニュー</strong>: 設定タブで登録したメニューから選択します</li>
+<li><strong>施術時間（分）</strong>: メニューを選択すると、デフォルトの施術時間が自動入力されます</li>
+</ul>
+<h3>4.2 体調レベルの記録</h3>
+<p>施術記録には、お客様の体調レベルを記録できます。</p>
+<ul>
+<li><strong>痛みレベル</strong> (0〜10): スライダーで入力</li>
+<li><strong>凝りレベル</strong> (0〜10): スライダーで入力</li>
+<li><strong>疲労レベル</strong> (0〜10): スライダーで入力</li>
+<li><strong>気になる部位</strong>: チェックボックスで複数選択（首、右肩、左肩、背中上部、背中下部、腰、右腕、左腕、右脚、左脚、頭、目、お腹、股関節、膝、足首・足裏）</li>
+<li><strong>体調メモ</strong>: その他のメモ</li>
+</ul>
+<h3>4.3 写真添付</h3>
+<p>施術記録に写真を添付できます（最大5枚）。</p>
+<p><strong>添付方法</strong>:</p>
+<ul>
+<li>「ファイルを選択」ボタンから画像ファイルを選択</li>
+<li>ドラッグ&amp;ドロップで画像を添付</li>
+</ul>
+<p><strong>仕様</strong>:</p>
+<ul>
+<li>すべての画像はJPEG形式に自動変換されます</li>
+<li>画像サイズは設定に応じて自動リサイズされます</li>
+<li>サムネイルが一覧表示されます</li>
+<li>サムネイルをタップすると拡大表示されます</li>
+</ul>
+<h3>4.4 施術記録の保存</h3>
+<ol>
+<li>必要な情報を入力したら「施術記録を保存」ボタンをタップします</li>
+<li>保存成功メッセージが表示されます</li>
+<li>「直近の記録」セクションに保存した記録が表示されます</li>
+</ol>
+<p><img src="/docs-images/07_treatment_saved.png" alt="施術記録保存後" /></p>
+<h3>4.5 施術記録の編集・削除</h3>
+<ul>
+<li>「履歴」タブのタイムラインから各記録を編集・削除できます</li>
+</ul>
+<hr />
+<h2>5. 施術履歴</h2>
+<h3>5.1 タイムライン表示</h3>
+<ol>
+<li>「顧客」タブで顧客を選択した後、「履歴」タブを開きます</li>
+<li>選択した顧客の施術記録がタイムライン形式で表示されます</li>
+</ol>
+<p><img src="/docs-images/08_history_timeline.png" alt="施術履歴タイムライン" /></p>
+<p>各記録には以下の情報が表示されます:</p>
+<ul>
+<li>施術日時</li>
+<li>主訴・所見・施術内容・施術後メモ</li>
+<li>施術メニュー・時間</li>
+<li>体調レベル</li>
+<li>添付写真</li>
+</ul>
+<h3>5.2 並び替え</h3>
+<p>「並び替え」ボタンで表示順を切り替えられます:</p>
+<ul>
+<li><strong>新しい順</strong>（デフォルト）</li>
+<li><strong>古い順</strong></li>
+</ul>
+<h3>5.3 ページネーション</h3>
+<p>1ページあたり20件ずつ表示されます。ページ切り替えボタンで前後のページに移動できます。</p>
+<hr />
+<h2>6. 設定</h2>
+<p><img src="/docs-images/09_settings.png" alt="設定タブ" /></p>
+<h3>6.1 データ管理</h3>
+<h4>エクスポート（バックアップ）</h4>
+<ol>
+<li>「設定」タブを開きます</li>
+<li>「エクスポート」ボタンをタップします</li>
+<li>JSON形式のバックアップファイルがダウンロードされます</li>
+</ol>
+<p>ファイル名: <code>smrm_backup_YYYYMMDD_HHMMSS.json</code></p>
+<p><strong>定期的なバックアップを推奨します。</strong></p>
+<h4>インポート（復元）</h4>
+<ol>
+<li>「設定」タブを開きます</li>
+<li>「インポート」ボタンをタップし、バックアップファイルを選択します</li>
+<li>データが読み込まれ、既存データとマージされます</li>
+</ol>
+<ul>
+<li>同じIDのデータは重複せずスキップされます</li>
+<li>施術メニューは名前が同じものはスキップされます</li>
+</ul>
+<h4>全データ削除</h4>
+<ol>
+<li>「全データ削除」ボタンをタップします</li>
+<li>確認ダイアログが表示されます</li>
+<li>「実行」をタップすると、すべてのデータが削除されます</li>
+</ol>
+<p><strong>注意</strong>: 削除されたデータは復元できません。事前にエクスポートすることを推奨します。</p>
+<h3>6.2 施術メニュー管理</h3>
+<p>施術記録で選択するメニューを管理します。</p>
+<ol>
+<li>「設定」タブの「施術メニュー管理」セクションを開きます</li>
+<li>「＋ メニューを追加」ボタンでメニューを追加します</li>
+<li>メニュー名とデフォルト施術時間を入力します</li>
+<li>入力は自動保存されます</li>
+</ol>
+<h3>6.3 表示設定</h3>
+<p>使用しないフィールドを非表示にして、画面をシンプルにできます。</p>
+<p><strong>顧客情報フィールド（12項目）</strong>:
+顧客コード、ふりがな、電話番号、メールアドレス、住所、職業、初回施術日、担当施術者、備考、アレルギー情報、既往歴、写真添付</p>
+<p><strong>施術記録フィールド（4項目）</strong>:
+施術メニュー、施術時間、体調レベル、写真添付</p>
+<p>チェックを外すと、対応するフィールドが各画面で非表示になります。</p>
+<p><img src="/docs-images/10_display_settings.png" alt="表示設定" /></p>
+<h3>6.4 画像圧縮設定</h3>
+<p>写真添付時の画質を3つのプリセットから選択できます。</p>
+<table>
+<thead>
+<tr>
+<th>プリセット</th>
+<th>特徴</th>
+<th>おすすめ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>高画質</strong></td>
+<td>長辺2048px・高品質。1枚あたり約300〜800KB</td>
+<td>肌の状態など詳細な記録が必要な場合</td>
+</tr>
+<tr>
+<td><strong>標準</strong>（デフォルト）</td>
+<td>長辺1200px。1枚あたり約100〜400KB</td>
+<td>通常の記録</td>
+</tr>
+<tr>
+<td><strong>容量節約</strong></td>
+<td>長辺800px・軽量。1枚あたり約50〜200KB</td>
+<td>ストレージ容量を節約したい場合</td>
+</tr>
+</tbody>
+</table>
+<p>※ 設定変更は新しく添付する写真にのみ適用されます。既存の写真には影響しません。</p>
+<p><img src="/docs-images/11_image_settings.png" alt="画像圧縮設定" /></p>
+<h3>6.5 アプリ情報</h3>
+<ul>
+<li>アプリのバージョンとビルド日時が表示されます</li>
+<li>「更新を確認」ボタンで、新しいバージョンが利用可能か確認できます</li>
+<li>新しいバージョンがある場合、画面上部にバナーが表示されます</li>
+</ul>
+<h3>6.6 サンプルデータ</h3>
+<p>「サンプルインポート」ボタンで、デモ用のサンプルデータ（顧客100名、施術記録10,000件）をインポートできます。動作確認やデモに便利です。</p>
+<hr />
+<h2>7. データの保存について</h2>
+<h3>7.1 保存場所</h3>
+<p>すべてのデータは、お使いのブラウザ内（IndexedDB）に保存されます。外部のサーバーに送信されることはありません。</p>
+<h3>7.2 データの永続性</h3>
+<ul>
+<li>ブラウザを閉じてもデータは保持されます</li>
+<li>ただし、ブラウザのキャッシュクリアやデータ削除を行うと、データが失われる場合があります</li>
+</ul>
+<h3>7.3 バックアップの重要性</h3>
+<p>データの紛失を防ぐため、定期的にエクスポート（バックアップ）を行うことを推奨します。</p>
+<p><strong>推奨バックアップ頻度</strong>: 週1回以上</p>
+<h3>7.4 端末の移行</h3>
+<p>他の端末にデータを移行する場合:</p>
+<ol>
+<li>移行元の端末でエクスポートを実行</li>
+<li>エクスポートされたJSONファイルを移行先の端末に転送</li>
+<li>移行先の端末でインポートを実行</li>
+</ol>
+<h3>7.5 PWA（ホーム画面への追加）</h3>
+<p>smrm はPWA（Progressive Web App）に対応しています。ブラウザのメニューから「ホーム画面に追加」を選択すると、アプリのようにホーム画面から起動できます。オフライン環境でもすべての機能が利用可能です。</p>
+
+</div>
+</body>
+</html>

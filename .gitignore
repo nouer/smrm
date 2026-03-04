@@ -4,7 +4,5 @@ coverage/
 .DS_Store
 .env
 
-# Generated docs (build-docs.sh)
-local_app/manual.html
-local_app/promotion.html
+# Generated docs images (build-docs.sh)
 local_app/docs-images/
