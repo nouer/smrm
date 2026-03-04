@@ -3,7 +3,7 @@
  * アセットキャッシュによる完全オフライン対応
  */
 
-const CACHE_NAME = 'smrm-v1.0.0-1772616405';
+const CACHE_NAME = 'smrm-v1.0.0-1772644854';
 
 const PRECACHE_ASSETS = [
     '/',
