@@ -34,6 +34,7 @@ fi
 # デフォルトは 8086。必要なら SMRM_PORT を指定する。
 SMRM_PORT="${SMRM_PORT:-8086}"
 ./scripts/generate_version.sh
+./scripts/build-docs.sh
 echo "Building and starting containers..."
 docker compose up -d --build smrm-app smrm-app-public
 echo "Done! App is running at http://localhost:${SMRM_PORT}"

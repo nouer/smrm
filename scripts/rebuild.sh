@@ -70,6 +70,9 @@ docker compose run --rm --entrypoint /bin/bash \
     smrm-test \
     -c "chmod +x scripts/generate_version.sh && ./scripts/generate_version.sh"
 
+echo "Building documentation HTML..."
+./scripts/build-docs.sh
+
 echo "Building app container..."
 docker compose build smrm-app
 

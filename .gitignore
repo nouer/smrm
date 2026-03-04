@@ -3,3 +3,8 @@ coverage/
 *.log
 .DS_Store
 .env
+
+# Generated docs (build-docs.sh)
+local_app/manual.html
+local_app/promotion.html
+local_app/docs-images/
