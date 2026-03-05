@@ -3,6 +3,3 @@ coverage/
 *.log
 .DS_Store
 .env
-
-# Generated docs images (build-docs.sh)
-local_app/docs-images/
