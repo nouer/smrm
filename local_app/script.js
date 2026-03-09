@@ -2183,6 +2183,9 @@ function updateImagePresetHint(preset) {
 }
 
 async function initApp() {
+    performance.mark('initApp-start');
+
+    // Phase 0: 同期初期化（I/O なし）
     initVersionInfo();
     initScrollToTop();
     initUpdateBanner();
@@ -2191,10 +2194,17 @@ async function initApp() {
     initLevelSliders();
     initCustomerSearch();
     initHistoryControls();
-    await initDisplaySettings();
-    await initImageSettings();
-    await initMenuSettings();
-    await refreshMenuDropdowns();
+
+    // Phase 1: 並列IDB読取（全て独立したDOM要素・IDBキーを操作）
+    await Promise.all([
+        initDisplaySettings(),
+        initImageSettings(),
+        initMenuSettings(),
+        refreshMenuDropdowns(),
+        loadCustomers(),
+    ]);
+
+    // Phase 2: Phase 1の結果に依存する同期処理
     initMenuDropdownDurationSync('input-treatment-menu', 'input-duration');
     initMenuDropdownDurationSync('edit-treatment-menu', 'edit-duration');
 
@@ -2254,9 +2264,16 @@ async function initApp() {
     initMediaAttachArea(document.getElementById('edit-record-media-area'), 'edit_treatment_record');
 
     handleTabFromUrl();
-    await loadCustomers();
-    await registerServiceWorker();
+
+    // Fire-and-forget: SW登録はアプリ準備完了をブロックしない
+    registerServiceWorker();
+
     document.body.dataset.appReady = 'true';
+
+    performance.mark('initApp-end');
+    performance.measure('initApp', 'initApp-start', 'initApp-end');
+    const measure = performance.getEntriesByName('initApp')[0];
+    console.log(`[SMRM] initApp completed in ${Math.round(measure.duration)}ms`);
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
