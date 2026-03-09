@@ -2,6 +2,33 @@
 
 個人サロン・治療院（マッサージ・整体・鍼灸・エステ等）向けのブラウザ完結型カルテ管理アプリケーション。
 
+## プロジェクト構成
+
+```
+smrm/
+├── local_app/              # メインアプリケーション (SPA)
+│   ├── index.html          # メインHTML
+│   ├── script.js           # UI・DB操作 (~3900行)
+│   ├── smrm.calc.js        # 純粋計算関数
+│   ├── style.css           # レスポンシブCSS
+│   ├── sw.js               # Service Worker (オフライン対応)
+│   ├── version.js          # バージョン情報（自動生成）
+│   ├── manifest.json       # PWA マニフェスト
+│   ├── icons/              # PWAアイコン (6ファイル)
+│   ├── smrm.calc.test.js   # ユニットテスト (Jest)
+│   ├── e2e.test.js         # E2Eテスト (Puppeteer)
+│   └── sample_data.json    # サンプルデータ
+├── docs/                   # ドキュメント (要件定義・設計・テスト仕様・マニュアル)
+├── scripts/                # ビルド・ユーティリティスクリプト
+├── tools/                  # 開発ツール (サンプルデータ生成・スクリーンショット)
+├── nginx/                  # Nginx設定
+├── tasks/                  # タスク管理 (todo.md, lessons.md)
+├── Dockerfile              # アプリ用コンテナ
+├── Dockerfile.test         # テスト用コンテナ
+├── docker-compose.yml      # 3サービス: app, app-public, test
+└── package.json            # Jest + Puppeteer (devDeps only)
+```
+
 ## 開発コマンド
 
 ```bash
