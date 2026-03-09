@@ -54,6 +54,17 @@
         <button id="update-banner-close" class="update-banner-close" type="button" aria-label="閉じる">&times;</button>
     </div>
 
+    <!-- エクスポート通知バナー -->
+    <div id="export-reminder-banner" class="export-reminder-banner" style="display:none;">
+        <span id="export-reminder-text">バックアップのためエクスポートをお勧めします。</span>
+        <label class="export-reminder-dismiss-label">
+            <input type="checkbox" id="export-reminder-dont-show">
+            <span>この通知を表示しない</span>
+        </label>
+        <a href="#" id="export-reminder-to-settings" class="export-reminder-link">設定</a>
+        <button id="export-reminder-close" class="export-reminder-close" type="button" aria-label="閉じる">&times;</button>
+    </div>
+
     <!-- タブナビゲーション -->
     <nav class="tab-nav" id="tab-nav">
         <button data-tab="customers" class="active">顧客</button>
@@ -292,6 +303,29 @@
                 <span data-preset="standard">通常の記録に十分な画質です。1枚あたり約100〜400KB</span>
                 <span data-preset="compact">ストレージ容量を節約します。1枚あたり約50〜200KB</span>
             </div>
+        </div>
+        <!-- エクスポート通知 -->
+        <div class="card">
+            <h3>エクスポート通知</h3>
+            <p class="setting-description">指定期間エクスポートしていない場合、アプリを開いたときに通知を表示します。</p>
+            <div class="form-group">
+                <label for="export-reminder-days">通知する間隔（日）</label>
+                <select id="export-reminder-days">
+                    <option value="3">3日</option>
+                    <option value="7" selected>7日</option>
+                    <option value="14">14日</option>
+                    <option value="30">30日</option>
+                </select>
+            </div>
+            <label class="checkbox-label"><input type="checkbox" id="export-reminder-enabled" checked> 通知を有効にする</label>
+            <button class="btn btn-sm" id="save-export-reminder-btn" style="margin-top:8px;">保存</button>
+        </div>
+        <!-- お知らせ -->
+        <div class="card">
+            <h3>お知らせ</h3>
+            <p class="setting-description">開発元からのお知らせを確認できます。</p>
+            <label class="checkbox-label"><input type="checkbox" id="setting-notify-enabled" checked> お知らせを通知する</label>
+            <button class="btn btn-primary btn-sm" id="btn-open-notification" style="margin-top:8px;">お知らせを見る</button>
         </div>
         <!-- アプリ情報 -->
         <div class="card">

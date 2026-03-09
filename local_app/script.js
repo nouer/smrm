@@ -10,6 +10,42 @@ const MEDIA_THUMB_SIZE = 200;
 const MEDIA_THUMB_QUALITY = 0.6;
 let currentImageSettings = null;
 
+// ===== エクスポート通知 =====
+const LS_KEY_LAST_EXPORT_AT = 'smrm_last_export_at';
+const LS_KEY_EXPORT_REMINDER_DAYS = 'smrm_export_reminder_days';
+const LS_KEY_EXPORT_REMINDER_ENABLED = 'smrm_export_reminder_enabled';
+const NOTIFY_URL = '/notify.html';
+
+function saveLastExportAt() {
+    try { localStorage.setItem(LS_KEY_LAST_EXPORT_AT, new Date().toISOString()); } catch (e) { /* 無視 */ }
+}
+function getLastExportAt() {
+    return localStorage.getItem(LS_KEY_LAST_EXPORT_AT) || null;
+}
+function getExportReminderDays() {
+    const v = parseInt(localStorage.getItem(LS_KEY_EXPORT_REMINDER_DAYS), 10);
+    return (isNaN(v) || v < 1) ? 7 : Math.min(365, Math.max(1, v));
+}
+function setExportReminderDays(days) {
+    try { localStorage.setItem(LS_KEY_EXPORT_REMINDER_DAYS, String(days)); } catch (e) { /* 無視 */ }
+}
+function getExportReminderEnabled() {
+    const v = localStorage.getItem(LS_KEY_EXPORT_REMINDER_ENABLED);
+    return v !== '0' && v !== 'false';
+}
+function setExportReminderEnabled(enabled) {
+    try { localStorage.setItem(LS_KEY_EXPORT_REMINDER_ENABLED, enabled ? '1' : '0'); } catch (e) { /* 無視 */ }
+}
+
+// ===== お知らせ =====
+let _pendingNotificationHash = null;
+
+async function hashString(str) {
+    const data = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 // ===== IndexedDB 操作 =====
 
 function openDB() {
@@ -1707,6 +1743,8 @@ async function exportData() {
         a.click();
         URL.revokeObjectURL(url);
 
+        saveLastExportAt();
+        hideExportReminderBanner();
         const mediaCount = allMedia.length;
         showMessage('data-message', `${customers.length}件の顧客、${allRecords.length}件の記録、${mediaCount}件のメディアをエクスポートしました`, 'success');
     } catch (error) {
@@ -2288,6 +2326,11 @@ async function initApp() {
 
     handleTabFromUrl();
 
+    initExportReminder();
+    checkExportReminder();
+    initNotification();
+    checkNotification();
+
     // Fire-and-forget: SW登録はアプリ準備完了をブロックしない
     registerServiceWorker();
 
@@ -2297,6 +2340,167 @@ async function initApp() {
     performance.measure('initApp', 'initApp-start', 'initApp-end');
     const measure = performance.getEntriesByName('initApp')[0];
     console.log(`[SMRM] initApp completed in ${Math.round(measure.duration)}ms`);
+}
+
+// ===== エクスポート通知バナー =====
+
+function checkExportReminder() {
+    if (!getExportReminderEnabled()) return;
+    const lastAt = getLastExportAt();
+    const days = getExportReminderDays();
+    if (!lastAt) {
+        showExportReminderBanner();
+        return;
+    }
+    if (Date.now() - new Date(lastAt).getTime() > days * 86400000) {
+        showExportReminderBanner();
+    }
+}
+
+function showExportReminderBanner() {
+    const banner = document.getElementById('export-reminder-banner');
+    const textEl = document.getElementById('export-reminder-text');
+    if (!banner || !textEl) return;
+    const days = getExportReminderDays();
+    const lastAt = getLastExportAt();
+    if (lastAt) {
+        const d = new Date(lastAt);
+        const lastStr = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+        textEl.textContent = `最終エクスポート: ${lastStr}。${days}日以上経過しています。バックアップのためエクスポートをお勧めします。`;
+    } else {
+        textEl.textContent = 'まだエクスポートしていません。バックアップのためエクスポートをお勧めします。';
+    }
+    const dontShow = document.getElementById('export-reminder-dont-show');
+    if (dontShow) dontShow.checked = false;
+    banner.style.display = 'flex';
+}
+
+function hideExportReminderBanner() {
+    const banner = document.getElementById('export-reminder-banner');
+    if (banner) banner.style.display = 'none';
+}
+
+function initExportReminder() {
+    const closeBtn = document.getElementById('export-reminder-close');
+    const dontShowCb = document.getElementById('export-reminder-dont-show');
+    const toSettingsLink = document.getElementById('export-reminder-to-settings');
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            if (dontShowCb && dontShowCb.checked) {
+                setExportReminderEnabled(false);
+                const enabledCb = document.getElementById('export-reminder-enabled');
+                if (enabledCb) enabledCb.checked = false;
+            }
+            hideExportReminderBanner();
+        });
+    }
+    if (toSettingsLink) {
+        toSettingsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            hideExportReminderBanner();
+            const btn = document.querySelector('.tab-nav button[data-tab="settings"]');
+            if (btn) btn.click();
+        });
+    }
+
+    const daysSelect = document.getElementById('export-reminder-days');
+    const enabledCb = document.getElementById('export-reminder-enabled');
+    const saveBtn = document.getElementById('save-export-reminder-btn');
+    if (daysSelect) {
+        daysSelect.value = String(getExportReminderDays());
+        if (!daysSelect.querySelector(`option[value="${daysSelect.value}"]`)) daysSelect.value = '7';
+    }
+    if (enabledCb) enabledCb.checked = getExportReminderEnabled();
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            const days = parseInt(document.getElementById('export-reminder-days').value, 10);
+            const enabled = document.getElementById('export-reminder-enabled').checked;
+            if (!isNaN(days) && days >= 1 && days <= 365) setExportReminderDays(days);
+            setExportReminderEnabled(enabled);
+            showMessage(null, 'エクスポート通知の設定を保存しました', 'success');
+        });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkExportReminder();
+    });
+}
+
+// ===== お知らせ =====
+
+async function checkNotification() {
+    try {
+        const enabled = localStorage.getItem('smrm_notification_enabled');
+        if (enabled === '0' || enabled === 'false') return;
+
+        const res = await fetch(NOTIFY_URL + '?_t=' + Date.now());
+        if (!res.ok) return;
+
+        const html = await res.text();
+        const newHash = await hashString(html);
+        const savedHash = localStorage.getItem('smrm_notification_hash');
+
+        if (newHash !== savedHash) {
+            _pendingNotificationHash = newHash;
+            showNotificationToast('開発元からのお知らせがあります。タップして確認');
+        }
+    } catch (e) {
+        // オフライン or ネットワークエラー時は静かにスキップ
+    }
+}
+
+function showNotificationToast(text) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-info toast-clickable';
+
+    const msgSpan = document.createElement('span');
+    msgSpan.className = 'toast-text';
+    msgSpan.textContent = text;
+    toast.appendChild(msgSpan);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'toast-close';
+    closeBtn.setAttribute('aria-label', '閉じる');
+    closeBtn.textContent = '\u00d7';
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dismissToast(toast);
+    });
+    toast.appendChild(closeBtn);
+
+    toast.addEventListener('click', () => {
+        dismissToast(toast);
+        openNotificationPage();
+    });
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+}
+
+function openNotificationPage() {
+    window.open(NOTIFY_URL, '_blank');
+    if (_pendingNotificationHash) {
+        localStorage.setItem('smrm_notification_hash', _pendingNotificationHash);
+        _pendingNotificationHash = null;
+    }
+}
+
+function initNotification() {
+    const enabledCb = document.getElementById('setting-notify-enabled');
+    const openBtn = document.getElementById('btn-open-notification');
+
+    if (enabledCb) {
+        const saved = localStorage.getItem('smrm_notification_enabled');
+        enabledCb.checked = saved !== '0' && saved !== 'false';
+        enabledCb.addEventListener('change', () => {
+            localStorage.setItem('smrm_notification_enabled', enabledCb.checked ? '1' : '0');
+        });
+    }
+    if (openBtn) {
+        openBtn.addEventListener('click', () => openNotificationPage());
+    }
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

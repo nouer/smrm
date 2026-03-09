@@ -3,7 +3,7 @@
  * アセットキャッシュによる完全オフライン対応
  */
 
-const CACHE_NAME = 'smrm-v1.0.0-1773053088';
+const CACHE_NAME = 'smrm-v1.0.0-1773100642';
 
 const PRECACHE_ASSETS = [
     '/',
@@ -18,7 +18,8 @@ const PRECACHE_ASSETS = [
     '/icons/icon-maskable-512.png',
     '/icons/apple-touch-icon.png',
     '/icons/favicon-32.png',
-    '/icons/favicon-16.png'
+    '/icons/favicon-16.png',
+    '/notify.html'
 ];
 
 self.addEventListener('install', (event) => {

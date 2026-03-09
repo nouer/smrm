@@ -15,13 +15,14 @@ describe('E2E Test: smrm App', () => {
     jest.setTimeout(300000);
 
     beforeAll(async () => {
+        console.log('[E2E] beforeAll: start');
         const host = process.env.E2E_APP_HOST || 'smrm-app';
         const fixedIp = String(process.env.E2E_APP_IP || '').trim();
         const hasFixedIp = Boolean(fixedIp && /^\d+\.\d+\.\d+\.\d+$/.test(fixedIp));
 
         if (hasFixedIp) {
             baseUrl = `http://${fixedIp}:80`;
-            console.log(`E2E baseUrl = ${baseUrl} (fixed)`);
+            console.log(`[E2E] baseUrl = ${baseUrl} (fixed)`);
         } else {
             const tryResolveIpv4 = () => {
                 try {
@@ -62,6 +63,7 @@ describe('E2E Test: smrm App', () => {
             console.log(`E2E baseUrl = ${baseUrl}`);
         }
 
+        console.log('[E2E] launching Chromium...');
         browser = await puppeteer.launch({
             headless: 'new',
             timeout: 300000,
@@ -74,26 +76,40 @@ describe('E2E Test: smrm App', () => {
                 `--unsafely-treat-insecure-origin-as-secure=${baseUrl}`
             ]
         });
+        console.log('[E2E] Chromium launched');
         page = await browser.newPage();
+        console.log('[E2E] new page created');
 
         page.on('pageerror', error => {
-            console.error('Browser Page Error:', error.message);
+            console.error('[E2E] Page Error:', error.message);
             pageErrors.push(error.message);
         });
 
         page.on('console', msg => {
             if (msg.type() === 'error') {
-                console.error('Browser Console Error:', msg.text());
+                console.error('[E2E] Console Error:', msg.text());
             }
         });
+        // E2Eテスト中は通知トースト・エクスポートリマインダーを無効化
+        // （トーストがz-index:10000でクリックを吸収し、テストをハングさせるため）
+        await page.evaluateOnNewDocument(() => {
+            localStorage.setItem('smrm_notification_enabled', '0');
+            localStorage.setItem('smrm_export_reminder_enabled', '0');
+        });
+
+        console.log('[E2E] beforeAll: done');
     }, 300000);
 
     afterAll(async () => {
+        console.log('[E2E] afterAll: closing browser...');
         if (browser) await browser.close();
+        console.log('[E2E] afterAll: done');
     });
 
     beforeEach(() => {
         pageErrors.length = 0;
+        const testName = expect.getState().currentTestName;
+        console.log(`[E2E] >>> ${testName}`);
     });
 
     const isVisible = async (selector) => {
@@ -106,8 +122,11 @@ describe('E2E Test: smrm App', () => {
     };
 
     const waitForApp = async () => {
-        await page.goto(baseUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-        await page.waitForSelector('.tab-nav', { timeout: 10000 });
+        await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await page.waitForFunction(
+            () => document.body && document.body.dataset.appReady === 'true',
+            { timeout: 30000 }
+        );
     };
 
     // ============================================================

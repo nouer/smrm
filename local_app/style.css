@@ -168,6 +168,65 @@ body {
     opacity: 1;
 }
 
+/* === エクスポート通知バナー === */
+.export-reminder-banner {
+    background: #dbeafe;
+    color: #1e40af;
+    border-bottom: 1px solid #93c5fd;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    font-size: 0.85em;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 44px;
+    z-index: 98;
+}
+
+.export-reminder-banner #export-reminder-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.export-reminder-dismiss-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.export-reminder-dismiss-label input {
+    margin: 0;
+}
+
+.export-reminder-link {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+.export-reminder-link:hover {
+    color: #1e40af;
+}
+
+.export-reminder-close {
+    background: none;
+    border: none;
+    color: #1e40af;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 2px 8px;
+    opacity: 0.7;
+    line-height: 1;
+    margin-left: auto;
+}
+
+.export-reminder-close:hover {
+    opacity: 1;
+}
+
 /* === タブナビゲーション === */
 .tab-nav {
     display: flex;
@@ -1505,3 +1564,34 @@ body {
 }
 .image-preset-hint span { display: none; }
 .image-preset-hint span.active { display: block; }
+
+/* === 設定カード内の説明・チェックボックス === */
+.setting-description {
+    font-size: 0.85em;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+}
+
+/* === クリック可能なトースト（お知らせ通知） === */
+.toast-clickable {
+    cursor: pointer;
+}
+
+.toast-clickable:hover {
+    filter: brightness(0.95);
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お知らせ — シンプルカルテ管理</title>
+<meta name="description" content="シンプルカルテ管理（SMRM）からのお知らせ">
+<link rel="icon" href="/icons/favicon-32.png" type="image/png">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    font-size: 16px; line-height: 1.8; color: #1a1a1a; background-color: #f8f8f8;
+}
+.container { max-width: 860px; margin: 0 auto; padding: 24px 32px 64px; background-color: #fff; min-height: 100vh; }
+nav.back-link { margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+nav.back-link a { color: #92400e; text-decoration: none; font-size: 14px; }
+nav.back-link a:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: bold; text-align: center; margin-bottom: 1.2em; padding-bottom: 0.4em; border-bottom: 2px solid #92400e; color: #92400e; }
+h2 { font-size: 22px; font-weight: bold; margin-top: 0; margin-bottom: 0.6em; }
+h3 { font-size: 18px; font-weight: bold; margin-top: 1.5em; margin-bottom: 0.4em; }
+p { margin: 0.6em 0; text-align: justify; }
+a { color: #92400e; text-decoration: none; }
+a:hover { text-decoration: underline; }
+sub { font-size: 12px; color: #888; }
+.notice { border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px 28px; margin: 1.5em 0; background-color: #fafafa; }
+.notice-date { font-size: 13px; color: #888; margin-bottom: 0.4em; }
+.feature-list { list-style: none; padding-left: 0; margin: 1em 0; }
+.feature-list li { padding: 6px 0 6px 1.6em; position: relative; }
+.feature-list li::before { content: "\2713"; position: absolute; left: 0; color: #92400e; font-weight: bold; }
+.link-btn { display: inline-block; background-color: #92400e; color: #fff; padding: 10px 24px; border-radius: 6px; font-size: 15px; font-weight: bold; margin-top: 1em; transition: background-color 0.2s; }
+.link-btn:hover { background-color: #78350f; text-decoration: none; }
+hr { border: none; border-top: 1px solid #ccc; margin: 2em 0; }
+@media (max-width: 600px) {
+    .container { padding: 16px 16px 48px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 19px; }
+    .notice { padding: 16px 18px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<nav class="back-link"><a href="/">← アプリに戻る</a></nav>
+<h1>シンプルカルテ管理 — お知らせ</h1>
+
+<div class="notice">
+<p class="notice-date">2026年3月9日</p>
+<h2>シンプルカルテ管理 v1.0 リリースのお知らせ</h2>
+<p>このたび、カルテ管理アプリ「シンプルカルテ管理（SMRM）」をリリースいたしました。</p>
+<p>個人サロン・治療院（マッサージ・整体・鍼灸・エステ等）の方が<strong>ブラウザだけで手軽にカルテを管理</strong>できるアプリケーションです。アカウント登録不要・完全無料でお使いいただけます。</p>
+
+<h3>主な機能</h3>
+<ul class="feature-list">
+<li><strong>顧客管理</strong> — 基本情報・アレルギー・既往歴を一元管理</li>
+<li><strong>施術記録</strong> — 主訴・所見・施術内容・体調レベルを記録</li>
+<li><strong>写真添付</strong> — 施術前後の写真を記録に添付</li>
+<li><strong>施術メニュー管理</strong> — カスタマイズ可能な施術メニュー</li>
+<li><strong>データのエクスポート/インポート</strong> — JSON形式でバックアップ・端末移行が簡単</li>
+<li><strong>オフライン対応（PWA）</strong> — インターネット接続なしでも全機能が利用可能</li>
+</ul>
+
+<p>操作方法の詳細は、ユーザーマニュアルをご覧ください。</p>
+<a href="/manual.html" class="link-btn">ユーザーマニュアルを見る</a>
+</div>
+
+<hr />
+<p><sub>ご不明な点やご要望がございましたら、<a href="https://github.com/nouer/smrm/issues">GitHub Issues</a> にてお気軽にお知らせください。</sub></p>
+
+</div>
+</body>
+</html>
