@@ -579,13 +579,36 @@ const GENDER_MAP = { male: '男性', female: '女性', other: 'その他' };
 
 // ===== UI ユーティリティ =====
 
-function showMessage(elementId, text, type) {
-    const el = document.getElementById(elementId);
-    el.textContent = text;
-    el.className = `message show ${type}`;
-    setTimeout(() => {
-        el.classList.remove('show');
-    }, 3000);
+function showMessage(_elementId, text, type) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type || 'info'}`;
+
+    const msgSpan = document.createElement('span');
+    msgSpan.className = 'toast-text';
+    msgSpan.textContent = text;
+    toast.appendChild(msgSpan);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'toast-close';
+    closeBtn.setAttribute('aria-label', '閉じる');
+    closeBtn.textContent = '\u00d7';
+    closeBtn.addEventListener('click', () => dismissToast(toast));
+    toast.appendChild(closeBtn);
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    if (type !== 'error') {
+        toast._autoTimer = setTimeout(() => dismissToast(toast), 3000);
+    }
+}
+
+function dismissToast(toast) {
+    if (toast._autoTimer) clearTimeout(toast._autoTimer);
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+    setTimeout(() => toast.remove(), 400);
 }
 
 function showConfirm(title, message, okText = '実行', okClass = 'btn-danger') {
@@ -1354,7 +1377,7 @@ async function saveEditRecord(event) {
         chiefComplaint, bodyFindings, treatmentContent, afterNotes
     });
     if (!recordValidation.valid) {
-        alert(recordValidation.errors[0]);
+        showMessage(null, recordValidation.errors[0], 'error');
         return;
     }
 
@@ -1385,7 +1408,7 @@ async function saveEditRecord(event) {
         await loadRecentRecords();
         await loadHistory();
     } catch (error) {
-        alert('更新に失敗しました: ' + error.message);
+        showMessage(null, '更新に失敗しました: ' + error.message, 'error');
     }
 }
 

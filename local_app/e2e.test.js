@@ -234,8 +234,8 @@ describe('E2E Test: smrm App', () => {
         await page.click('#save-record-btn');
         await new Promise(r => setTimeout(r, 2000));
 
-        // 保存成功メッセージ
-        const messageText = await page.$eval('#record-message', el => el.textContent);
+        // 保存成功トースト
+        const messageText = await page.$eval('#toast-container', el => el.textContent);
         expect(messageText).toContain('保存');
     });
 

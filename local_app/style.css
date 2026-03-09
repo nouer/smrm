@@ -921,37 +921,81 @@ body {
 }
 
 /* === メッセージ === */
-.message {
+/* === トースト通知 === */
+.toast-container {
+    position: fixed;
+    top: 52px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 90%;
+    max-width: 480px;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     padding: 10px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.9em;
-    margin-bottom: 12px;
-    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(-12px);
+    transition: opacity 0.3s, transform 0.3s;
 }
 
-.message.show {
-    display: block;
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-.message.success {
+.toast-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    opacity: 0.6;
+    color: inherit;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
+
+.toast-success {
     background: var(--success-light);
     color: var(--success);
     border: 1px solid #86efac;
 }
 
-.message.error {
+.toast-error {
     background: var(--danger-light);
     color: var(--danger);
     border: 1px solid #fca5a5;
 }
 
-.message.info {
+.toast-info {
     background: var(--primary-light);
     color: var(--primary);
     border: 1px solid #fbbf24;
 }
 
-.message.progress {
+.toast-progress {
     background: var(--primary-light);
     color: var(--primary);
     border: 1px solid #fbbf24;
