@@ -70,7 +70,8 @@ describe('E2E Test: smrm App', () => {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu'
+                '--disable-gpu',
+                `--unsafely-treat-insecure-origin-as-secure=${baseUrl}`
             ]
         });
         page = await browser.newPage();
@@ -183,9 +184,13 @@ describe('E2E Test: smrm App', () => {
         await page.type('#customer-search', 'ZZZZNOTEXIST');
         await new Promise(r => setTimeout(r, 500));
 
-        // 存在しない検索で顧客カードが0件になる
-        const cards = await page.$$('#customer-list .customer-card');
-        expect(cards.length).toBe(0);
+        // 存在しない検索で表示中の顧客カードが0件になる
+        // 注: フィルタは display:none で隠すだけなので、可視カードのみカウント
+        const visibleCount = await page.evaluate(() => {
+            const cards = document.querySelectorAll('#customer-list .customer-card');
+            return [...cards].filter(c => c.style.display !== 'none').length;
+        });
+        expect(visibleCount).toBe(0);
 
         // クリア
         await page.$eval('#customer-search', el => el.value = '');
@@ -314,6 +319,15 @@ describe('E2E Test: smrm App', () => {
     test('E2E-010: ヘッダークリックでページ先頭へ戻る', async () => {
         await waitForApp();
 
+        // ページをスクロール可能にするためスペーサーを挿入
+        // (コンテンツが少ない場合 body min-height:100vh でビューポートに収まりスクロール不可)
+        await page.evaluate(() => {
+            const spacer = document.createElement('div');
+            spacer.id = 'e2e-scroll-spacer';
+            spacer.style.height = '2000px';
+            document.body.appendChild(spacer);
+        });
+
         // まずスクロールする
         await page.evaluate(() => window.scrollTo(0, 500));
         await new Promise(r => setTimeout(r, 300));
@@ -327,6 +341,12 @@ describe('E2E Test: smrm App', () => {
 
         const scrollAfter = await page.evaluate(() => window.scrollY);
         expect(scrollAfter).toBe(0);
+
+        // スペーサー除去
+        await page.evaluate(() => {
+            const spacer = document.getElementById('e2e-scroll-spacer');
+            if (spacer) spacer.remove();
+        });
     });
 
     // ============================================================
