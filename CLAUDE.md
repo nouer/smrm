@@ -8,16 +8,20 @@
 smrm/
 ├── local_app/              # メインアプリケーション (SPA)
 │   ├── index.html          # メインHTML
-│   ├── script.js           # UI・DB操作 (~3900行)
+│   ├── script.js           # UI・DB操作 (~2500行)
 │   ├── smrm.calc.js        # 純粋計算関数
 │   ├── style.css           # レスポンシブCSS
 │   ├── sw.js               # Service Worker (オフライン対応)
 │   ├── version.js          # バージョン情報（自動生成）
 │   ├── manifest.json       # PWA マニフェスト
 │   ├── icons/              # PWAアイコン (6ファイル)
+│   ├── docs-images/        # ドキュメント用画像
 │   ├── smrm.calc.test.js   # ユニットテスト (Jest)
 │   ├── e2e.test.js         # E2Eテスト (Puppeteer)
-│   └── sample_data.json    # サンプルデータ
+│   ├── sample_data.json    # サンプルデータ
+│   ├── notify.html         # お知らせ通知ページ
+│   ├── manual.html         # マニュアルHTML
+│   └── promotion.html      # プロモーションHTML
 ├── docs/                   # ドキュメント (要件定義・設計・テスト仕様・マニュアル)
 ├── scripts/                # ビルド・ユーティリティスクリプト
 ├── tools/                  # 開発ツール (サンプルデータ生成・スクリーンショット)
@@ -32,7 +36,7 @@ smrm/
 ## 開発コマンド
 
 ```bash
-# Docker ビルド＆起動（ポート 8085）
+# Docker ビルド＆起動（ポート 8086）
 bash scripts/build.sh
 
 # 強制リビルド
