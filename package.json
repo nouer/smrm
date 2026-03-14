@@ -4,7 +4,8 @@
   "description": "シンプルカルテ管理 (Simple Medical Record Management)",
   "main": "local_app/script.js",
   "scripts": {
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "test:usecases": "jest --config='{\"testEnvironment\":\"node\",\"testMatch\":[\"**/usecases.e2e.test.js\"]}' --forceExit --runInBand"
   },
   "jest": {
     "testEnvironment": "jsdom",
