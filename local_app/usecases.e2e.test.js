@@ -698,7 +698,44 @@ describe('ユースケースE2E: smrm', () => {
             expect(hasContent).toBe(true);
         });
 
-        test('UC4-03: 並び替えボタンで順序切替', async () => {
+        test('UC4-03: タイムラインエントリをクリックで展開/折りたたみ', async () => {
+            // エントリが存在することを確認
+            const entry = await page.$('#timeline-container .timeline-entry');
+            expect(entry).not.toBeNull();
+
+            // 初期状態: expanded クラスなし
+            const initialExpanded = await page.$eval(
+                '#timeline-container .timeline-entry',
+                el => el.classList.contains('expanded')
+            );
+            expect(initialExpanded).toBe(false);
+
+            // クリックで展開
+            await entry.click();
+            const afterClick = await page.$eval(
+                '#timeline-container .timeline-entry',
+                el => el.classList.contains('expanded')
+            );
+            expect(afterClick).toBe(true);
+
+            // body が表示されている
+            const bodyVisible = await page.$eval(
+                '#timeline-container .timeline-entry .timeline-entry-body',
+                el => el.offsetHeight > 0
+            );
+            expect(bodyVisible).toBe(true);
+
+            // ヘッダークリックで折りたたみ
+            const header = await entry.$('.timeline-entry-header');
+            await header.click();
+            const afterSecondClick = await page.$eval(
+                '#timeline-container .timeline-entry',
+                el => el.classList.contains('expanded')
+            );
+            expect(afterSecondClick).toBe(false);
+        });
+
+        test('UC4-03a: 並び替えボタンで順序切替', async () => {
             const entryCount = await page.$$eval('#timeline-container .timeline-entry', e => e.length);
             expect(entryCount).toBeGreaterThanOrEqual(1);
 
@@ -715,6 +752,106 @@ describe('ユースケースE2E: smrm', () => {
 
             const countRestored = await page.$$eval('#timeline-container .timeline-entry', e => e.length);
             expect(countRestored).toBe(entryCount);
+        });
+
+        test('UC4-03b: 直近記録の「詳細」ボタンで詳細オーバーレイ表示', async () => {
+            await clickTab('treatment');
+            await new Promise(r => setTimeout(r, 500));
+
+            // 最初の記録の「詳細」ボタンをクリック
+            await page.evaluate(() => {
+                const btns = document.querySelectorAll('#recent-records-list .btn-secondary');
+                for (const btn of btns) {
+                    if (btn.textContent.includes('詳細')) { btn.click(); return; }
+                }
+            });
+            await waitOverlayOpen('#record-detail-overlay');
+
+            // 詳細オーバーレイの内容確認
+            const detailText = await page.$eval('#record-detail-body', el => el.textContent);
+            expect(detailText).toContain('主訴');
+            expect(detailText).toContain('施術日時');
+
+            // 閉じる
+            await page.click('#record-detail-close');
+            await waitOverlayClosed('#record-detail-overlay');
+        });
+
+        test('UC4-03c: 詳細オーバーレイの「編集」ボタンで編集に遷移', async () => {
+            // 詳細を再度開く
+            await page.evaluate(() => {
+                const btns = document.querySelectorAll('#recent-records-list .btn-secondary');
+                for (const btn of btns) {
+                    if (btn.textContent.includes('詳細')) { btn.click(); return; }
+                }
+            });
+            await waitOverlayOpen('#record-detail-overlay');
+
+            // 「編集」ボタンをクリック
+            await page.click('#record-detail-edit');
+            await waitOverlayClosed('#record-detail-overlay');
+            await waitOverlayOpen('#edit-record-overlay');
+
+            // 編集フォームが表示されている
+            const editVisible = await page.$eval('#edit-record-overlay', el => el.classList.contains('show'));
+            expect(editVisible).toBe(true);
+
+            // キャンセルで閉じる（確認ダイアログあり）
+            await page.click('#edit-record-cancel');
+            await waitOverlayOpen('#confirm-overlay');
+            await page.click('#confirm-ok');
+            await waitOverlayClosed('#confirm-overlay');
+            await waitOverlayClosed('#edit-record-overlay');
+        });
+
+        test('UC4-03d: タイムライン展開→「詳細」ボタンで詳細オーバーレイ', async () => {
+            await clickTab('history');
+            await new Promise(r => setTimeout(r, 500));
+
+            // エントリを展開
+            const entry = await page.$('#timeline-container .timeline-entry');
+            await entry.click();
+            await new Promise(r => setTimeout(r, 300));
+
+            // 詳細ボタンをクリック
+            await page.evaluate(() => {
+                const btns = document.querySelectorAll('#timeline-container .timeline-actions .btn-secondary');
+                for (const btn of btns) {
+                    if (btn.textContent.includes('詳細')) { btn.click(); return; }
+                }
+            });
+            await waitOverlayOpen('#record-detail-overlay');
+
+            const detailText = await page.$eval('#record-detail-body', el => el.textContent);
+            expect(detailText).toContain('施術日時');
+
+            await page.click('#record-detail-close');
+            await waitOverlayClosed('#record-detail-overlay');
+        });
+
+        test('UC4-03e: タイムライン展開→ヘッダークリック→折りたたみ', async () => {
+            // エントリがまだ展開中のはず
+            const entry = await page.$('#timeline-container .timeline-entry');
+            const isExpanded = await page.$eval(
+                '#timeline-container .timeline-entry',
+                el => el.classList.contains('expanded')
+            );
+
+            if (!isExpanded) {
+                await entry.click();
+                await new Promise(r => setTimeout(r, 300));
+            }
+
+            // ヘッダークリックで折りたたみ
+            const header = await entry.$('.timeline-entry-header');
+            await header.click();
+            await new Promise(r => setTimeout(r, 300));
+
+            const afterFold = await page.$eval(
+                '#timeline-container .timeline-entry',
+                el => el.classList.contains('expanded')
+            );
+            expect(afterFold).toBe(false);
         });
 
         test('UC4-04: 施術記録を編集', async () => {

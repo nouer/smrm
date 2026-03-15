@@ -229,7 +229,7 @@
             <div class="card">
                 <div class="history-controls">
                     <h3>施術履歴</h3>
-                    <button class="btn btn-sm" id="sort-toggle-btn">並び替え</button>
+                    <button class="btn btn-sm btn-secondary" id="sort-toggle-btn">並び替え</button>
                 </div>
                 <div id="timeline-container" class="timeline-container"></div>
                 <div id="timeline-pagination" class="pagination"></div>
@@ -318,7 +318,7 @@
                 </select>
             </div>
             <label class="checkbox-label"><input type="checkbox" id="export-reminder-enabled" checked> 通知を有効にする</label>
-            <button class="btn btn-sm" id="save-export-reminder-btn" style="margin-top:8px;">保存</button>
+            <button class="btn btn-sm btn-secondary" id="save-export-reminder-btn" style="margin-top:8px;">保存</button>
         </div>
         <!-- お知らせ -->
         <div class="card">
@@ -331,7 +331,7 @@
         <div class="card">
             <h3>アプリ情報</h3>
             <div id="app-version-info"></div>
-            <button class="btn btn-sm" id="check-update-btn">更新を確認</button>
+            <button class="btn btn-sm btn-secondary" id="check-update-btn">更新を確認</button>
             <div id="update-check-status"></div>
         </div>
         <!-- サンプルデータ -->
@@ -556,6 +556,18 @@
         <div class="media-lightbox-content" onclick="event.stopPropagation()">
             <button class="media-lightbox-close" onclick="closeLightbox()">&times;</button>
             <img id="media-lightbox-img" src="" alt="拡大画像">
+        </div>
+    </div>
+
+    <!-- 施術記録詳細表示（読み取り専用） -->
+    <div id="record-detail-overlay" class="overlay">
+        <div class="overlay-content overlay-content-wide">
+            <h3>施術記録詳細</h3>
+            <div id="record-detail-body"></div>
+            <div class="btn-group" style="justify-content: flex-end; margin-top: 16px;">
+                <button type="button" class="btn btn-secondary" id="record-detail-close">閉じる</button>
+                <button type="button" class="btn btn-primary" id="record-detail-edit">編集</button>
+            </div>
         </div>
     </div>
 

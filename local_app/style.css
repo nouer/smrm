@@ -512,6 +512,7 @@ body {
 .customer-card .customer-card-actions {
     display: flex;
     gap: 4px;
+    margin-left: auto;
 }
 
 .customer-card-thumb {
@@ -787,6 +788,18 @@ body {
     white-space: nowrap;
 }
 
+/* === 削除ボタン間隔（誤操作防止） === */
+.record-actions .btn-danger,
+.timeline-actions .btn-danger,
+.customer-card-actions .btn-danger {
+    margin-left: 8px;
+}
+
+/* === 保存ボタンと直近記録の余白 === */
+#save-record-btn {
+    margin-bottom: 24px;
+}
+
 /* === 直近記録 === */
 .recent-record-card {
     padding: 12px;
@@ -932,6 +945,15 @@ body {
     margin-bottom: 4px;
     line-height: 1.4;
     color: var(--gray-700);
+}
+
+.timeline-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--gray-200);
+    justify-content: flex-end;
 }
 
 /* === 履歴コントロール === */
@@ -1091,6 +1113,9 @@ body {
     border-radius: 6px;
     margin-bottom: 12px;
 }
+
+/* === 確認ダイアログ（編集オーバーレイの上に表示） === */
+#confirm-overlay { z-index: 210; }
 
 /* === オーバーレイ（モーダル） === */
 .overlay {
@@ -1365,6 +1390,7 @@ body {
     .tab-nav,
     .btn,
     .record-actions,
+    .timeline-actions,
     .search-bar,
     .settings-buttons,
     .overlay {

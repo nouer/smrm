@@ -665,6 +665,11 @@ function showConfirm(title, message, okText = '実行', okClass = 'btn-danger') 
     });
 }
 
+async function closeEditOverlayWithConfirm(overlayId) {
+    const ok = await showConfirm('確認', '編集中の内容が失われます。閉じますか？', '閉じる', 'btn-danger');
+    if (ok) document.getElementById(overlayId).classList.remove('show');
+}
+
 // ===== 顧客管理 =====
 
 async function loadCustomers() {
@@ -714,7 +719,7 @@ function renderCustomerCard(customer, media) {
         </div>
         <div class="customer-card-actions">
             <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); openCustomerDetail('${customer.id}')">詳細</button>
-            <button class="btn btn-sm" onclick="event.stopPropagation(); openCustomerForm('${customer.id}')">編集</button>
+            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openCustomerForm('${customer.id}')">編集</button>
             <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteCustomer('${customer.id}')">削除</button>
         </div>
     </div>`;
@@ -1339,7 +1344,8 @@ function renderRecentRecord(record) {
             <span class="record-date">${formatDateTime(record.visitedAt)}</span>
             ${menuHtml}
             <div class="record-actions">
-                <button class="btn btn-sm" onclick="openEditRecord('${record.id}')">編集</button>
+                <button class="btn btn-sm btn-secondary" onclick="openRecordDetail('${record.id}')">詳細</button>
+                <button class="btn btn-sm btn-primary" onclick="openEditRecord('${record.id}')">編集</button>
                 <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">削除</button>
             </div>
         </div>
@@ -1347,6 +1353,82 @@ function renderRecentRecord(record) {
         <div class="record-treatment">${treatmentSummary}</div>
         ${mediaHtml}
     </div>`;
+}
+
+async function openRecordDetail(recordId) {
+    const record = await getFromStore('treatment_records', recordId);
+    if (!record) return;
+
+    const media = await getMediaByParent(recordId);
+    const bc = record.bodyCondition || {};
+
+    let html = '<div class="detail-content">';
+    html += detailRow('施術日時', formatDateTime(record.visitedAt));
+    html += detailRow('メニュー', record.treatmentMenu || '', 'treatment.menu');
+    html += detailRow('施術時間', record.duration ? `${record.duration}分` : '', 'treatment.duration');
+    html += detailRow('主訴', record.chiefComplaint || '', 'treatment.chief');
+    html += detailRow('所見', record.bodyFindings || '', 'treatment.findings');
+    html += detailRow('施術内容', record.treatmentContent || '', 'treatment.content');
+    html += detailRow('施術後メモ', record.afterNotes || '', 'treatment.after');
+
+    // 体調レベル
+    let conditionHtml = '';
+    if (bc.painLevel != null && bc.painLevel > 0) {
+        conditionHtml += `<span class="condition-tag condition-pain">痛み ${bc.painLevel}/10</span>`;
+    }
+    if (bc.stiffnessLevel != null && bc.stiffnessLevel > 0) {
+        conditionHtml += `<span class="condition-tag condition-stiffness">凝り ${bc.stiffnessLevel}/10</span>`;
+    }
+    if (bc.fatigueLevel != null && bc.fatigueLevel > 0) {
+        conditionHtml += `<span class="condition-tag condition-fatigue">疲労 ${bc.fatigueLevel}/10</span>`;
+    }
+    if (bc.areas && bc.areas.length > 0) {
+        conditionHtml += `<span class="condition-tag condition-areas">${bc.areas.map(a => escapeHtml(a)).join('・')}</span>`;
+    }
+    if (bc.notes) {
+        conditionHtml += `<div style="margin-top: 4px;">${escapeHtml(bc.notes)}</div>`;
+    }
+    if (conditionHtml) {
+        html += `<div class="detail-row" data-field-key="treatment.bodyCondition">
+            <dt>${escapeHtml('体調')}</dt>
+            <dd>${conditionHtml}</dd>
+        </div>`;
+    }
+
+    // 写真
+    if (media.length > 0) {
+        html += `<div class="detail-row" data-field-key="treatment.photo">
+            <dt>${escapeHtml('写真')}</dt>
+            <dd><div class="media-inline-thumbs">${media.map(m =>
+                `<img src="${m.thumbnail}" alt="${escapeHtml(m.fileName)}" onclick="openMediaLightbox('${m.id}', 'saved')" class="media-inline-thumb">`
+            ).join('')}</div></dd>
+        </div>`;
+    }
+
+    html += '</div>';
+
+    const overlay = document.getElementById('record-detail-overlay');
+    if (!overlay) return;
+    overlay.dataset.recordId = recordId;
+    document.getElementById('record-detail-body').innerHTML = html;
+    overlay.classList.add('show');
+    applyDisplaySettings(await loadDisplaySettings());
+}
+
+function handleTimelineClick(entry, event) {
+    if (event.target.closest('.timeline-actions')) return;
+    if (event.target.closest('.media-inline-thumb')) return;
+
+    const isExpanded = entry.classList.contains('expanded');
+    const clickedHeader = event.target.closest('.timeline-entry-header');
+
+    if (!isExpanded) {
+        entry.classList.add('expanded');
+    } else if (clickedHeader) {
+        entry.classList.remove('expanded');
+    } else {
+        openRecordDetail(entry.dataset.id);
+    }
 }
 
 async function openEditRecord(recordId) {
@@ -1456,6 +1538,7 @@ async function deleteRecord(recordId) {
         await deleteMediaByParent(recordId);
         await deleteFromStore('treatment_records', recordId);
         await loadRecentRecords();
+        await loadHistory();
         showPrevAfterNotesHint();
     } catch (error) {
         showMessage('record-message', '削除に失敗しました: ' + error.message, 'error');
@@ -1637,12 +1720,12 @@ function renderTimelineEntry(entry) {
 
         const recordMediaHtml = (r._media && r._media.length > 0)
             ? `<div class="media-inline-thumbs" data-field-key="treatment.photo">${r._media.map(m =>
-                `<img src="${m.thumbnail}" alt="${escapeHtml(m.fileName)}" onclick="openMediaLightbox('${m.id}', 'saved')" class="media-inline-thumb">`
+                `<img src="${m.thumbnail}" alt="${escapeHtml(m.fileName)}" onclick="event.stopPropagation(); openMediaLightbox('${m.id}', 'saved')" class="media-inline-thumb">`
             ).join('')}</div>`
             : '';
 
-        return `<div class="timeline-entry timeline-treatment" data-id="${r.id}">
-            <div class="timeline-entry-header" onclick="this.parentElement.classList.toggle('expanded')">
+        return `<div class="timeline-entry timeline-treatment" data-id="${r.id}" onclick="handleTimelineClick(this, event)">
+            <div class="timeline-entry-header">
                 <span class="timeline-date">${dateStr}</span>
                 <span class="timeline-type-label">施術記録</span>
                 ${menuBadge}
@@ -1652,6 +1735,11 @@ function renderTimelineEntry(entry) {
                 ${conditionSummary ? `<div class="timeline-condition">${escapeHtml(conditionSummary)}</div>` : ''}
                 ${r.treatmentContent ? `<div class="timeline-treatment-content"><strong>施術:</strong> ${escapeHtml(r.treatmentContent.substring(0, 80))}</div>` : ''}
                 ${recordMediaHtml}
+                <div class="timeline-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); openRecordDetail('${r.id}')">詳細</button>
+                    <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openEditRecord('${r.id}')">編集</button>
+                    <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteRecord('${r.id}')">削除</button>
+                </div>
             </div>
         </div>`;
     }
@@ -2274,7 +2362,7 @@ async function initApp() {
     document.getElementById('add-customer-btn').addEventListener('click', () => openCustomerForm());
     document.getElementById('customer-form').addEventListener('submit', saveCustomer);
     document.getElementById('customer-form-cancel').addEventListener('click', () => {
-        document.getElementById('customer-form-overlay').classList.remove('show');
+        closeEditOverlayWithConfirm('customer-form-overlay');
     });
     document.getElementById('add-allergy-btn').addEventListener('click', () => addAllergyRow());
     document.getElementById('add-history-btn').addEventListener('click', () => addHistoryRow());
@@ -2284,8 +2372,24 @@ async function initApp() {
     });
     document.getElementById('edit-record-form').addEventListener('submit', saveEditRecord);
     document.getElementById('edit-record-cancel').addEventListener('click', () => {
-        document.getElementById('edit-record-overlay').classList.remove('show');
+        closeEditOverlayWithConfirm('edit-record-overlay');
     });
+
+    // 施術記録詳細オーバーレイ
+    const recordDetailClose = document.getElementById('record-detail-close');
+    if (recordDetailClose) {
+        recordDetailClose.addEventListener('click', () => {
+            document.getElementById('record-detail-overlay').classList.remove('show');
+        });
+    }
+    const recordDetailEdit = document.getElementById('record-detail-edit');
+    if (recordDetailEdit) {
+        recordDetailEdit.addEventListener('click', () => {
+            const rid = document.getElementById('record-detail-overlay').dataset.recordId;
+            document.getElementById('record-detail-overlay').classList.remove('show');
+            if (rid) openEditRecord(rid);
+        });
+    }
 
     // 顧客詳細オーバーレイ
     document.getElementById('customer-detail-close').addEventListener('click', () => {
@@ -2295,6 +2399,26 @@ async function initApp() {
         const cid = document.getElementById('customer-detail-overlay').dataset.customerId;
         document.getElementById('customer-detail-overlay').classList.remove('show');
         if (cid) openCustomerForm(cid);
+    });
+
+    // 読取専用オーバーレイ: 背景クリックで即座に閉じる
+    ['record-detail-overlay', 'customer-detail-overlay'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', (e) => {
+                if (e.target === el) el.classList.remove('show');
+            });
+        }
+    });
+
+    // 編集系オーバーレイ: 背景クリックで確認ダイアログ表示
+    ['customer-form-overlay', 'edit-record-overlay'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', (e) => {
+                if (e.target === el) closeEditOverlayWithConfirm(id);
+            });
+        }
     });
 
     // 顧客情報バー → 詳細表示
